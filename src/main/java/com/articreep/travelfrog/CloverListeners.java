@@ -31,6 +31,7 @@ public class CloverListeners implements Listener {
         // Import the amount of four-leaf and regular clovers.
         int fourLeafClovers = CloverDatabase.getFourLeafCloversWaiting(p);
         int importedClovers = CloverDatabase.getCloversWaiting(p);
+        long generatedClovers = (CloverDatabase.getLastSeen(p).until(Instant.now(), ChronoUnit.MINUTES) / 6);
         long counter;
 
         // The counter increases 5 per 1800s (30 minutes), max 25.
@@ -39,21 +40,27 @@ public class CloverListeners implements Listener {
         // If the player already has clovers waiting in the field from previous sessions, load that, and add it to the clovers that generated now.
         // If this value is non-zero don't add the random bonus.
 
-        counter = importedClovers +
-                (CloverDatabase.getLastSeen(p).until(Instant.now(), ChronoUnit.MINUTES) / 6);
-
-        // If all clovers are newly generated, cap them at 25 (so the random bonus can be applied for a max of 30)
-        if (importedClovers == 0 && counter > 25) counter = 25;
-
-        // Hard cap at 30. Yes, you can generate completely new clovers, say 28 of them, and wait a bit more to generate more to get 30.
-        // That's not optimal, so we can leave that in this mechanic.
-        if (counter > 30) counter = 30;
+        // If these imported clovers amount to 25 or higher, do not generate any new clovers.
+        // The reasoning of this is to encourage people to clear their entire field.
+        // If you leave one clover, you will not be eligible for the random bonus.
+        if (importedClovers >= 25) {
+            // Here we import the existing clovers and do not add (what could have been) generated clovers.
+            counter = importedClovers;
+        } else {
+            // The imported clover count was below 25, so we can generate more.
+            // But the total can't go beyond 25.
+            counter = importedClovers + generatedClovers;
+            if (counter > 25) counter = 25;
+        }
 
         // This is the bonus, from 0 to 5. There cannot be any imported clovers, and the counter must be above 5.
         // This means that you'd have to clear your clover field and log off for 30 minutes for this bonus to apply next time you log in.
         if (importedClovers == 0 && counter > 5) {
             counter = counter + (int) (Math.random() * 5);
         }
+
+        // Hard cap at 30 - just in case my logic has gone wrong.
+        if (counter > 30) counter = 30;
 
         // Now that we know how many clovers to add to the field, start making some sets.
         final Set<Location> cloverSet = new HashSet<>();
