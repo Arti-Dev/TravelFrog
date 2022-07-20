@@ -28,7 +28,7 @@ public class CloverListeners implements Listener {
 
         // Spawn the clovers in the field.
 
-        // Import the amount of four-leaf clovers first.
+        // Import the amount of four-leaf and regular clovers.
         int fourLeafClovers = CloverDatabase.getFourLeafCloversWaiting(p);
         int importedClovers = CloverDatabase.getCloversWaiting(p);
         long counter;
@@ -42,16 +42,27 @@ public class CloverListeners implements Listener {
         counter = importedClovers +
                 (CloverDatabase.getLastSeen(p).until(Instant.now(), ChronoUnit.MINUTES) / 6);
 
-        if (counter > 25) counter = 25;
+        // If all clovers are newly generated, cap them at 25 (so the random bonus can be applied for a max of 30)
+        if (importedClovers == 0 && counter > 25) counter = 25;
 
-        if (counter > 5 && CloverDatabase.getCloversWaiting(p) == 0) {
+        // Hard cap at 30. Yes, you can generate completely new clovers, say 28 of them, and wait a bit more to generate more to get 30.
+        // That's not optimal, so we can leave that in this mechanic.
+        if (counter > 30) counter = 30;
+
+        // This is the bonus, from 0 to 5. There cannot be any imported clovers, and the counter must be above 5.
+        // This means that you'd have to clear your clover field and log off for 30 minutes for this bonus to apply next time you log in.
+        if (importedClovers == 0 && counter > 5) {
             counter = counter + (int) (Math.random() * 5);
         }
 
-        // Add all of these to a Set.
+        // Now that we know how many clovers to add to the field, start making some sets.
         final Set<Location> cloverSet = new HashSet<>();
         final Set<Location> fourLeafCloverSet = new HashSet<>();
 
+        // Four leaf clovers are NOT counted individually. They count towards the total clover count, but are stored in a separate Set.
+        // The total clover count is both set sizes combined.
+
+        // Every time a clover is generated the counter goes down by 1 until it reaches 0.
         // First add four-leaf clovers if there are any from previous sessions.
         for (; counter > 0 && fourLeafClovers > 0; fourLeafClovers--, counter--) {
             fourLeafCloverSet.add(getRandomCloverLocation(fourLeafCloverSet, p.getWorld(), CloverType.FOUR_LEAF_CLOVER));
@@ -68,6 +79,7 @@ public class CloverListeners implements Listener {
             }
         }
 
+        // Use a BukkitRunnable to display all the clovers to the player.
         CloverDisplayRunnable runnable = new CloverDisplayRunnable(p, cloverSet, fourLeafCloverSet);
 
         runnable.runTaskTimer(TravelFrog.getPlugin(), 1, 5);
