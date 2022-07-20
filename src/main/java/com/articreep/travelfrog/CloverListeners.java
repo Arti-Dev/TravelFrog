@@ -28,7 +28,10 @@ public class CloverListeners implements Listener {
 
         // Spawn the clovers in the field.
 
-        long counter = 0;
+        // Import the amount of four-leaf clovers first.
+        int fourLeafClovers = CloverDatabase.getFourLeafCloversWaiting(p);
+        int importedClovers = CloverDatabase.getCloversWaiting(p);
+        long counter;
 
         // The counter increases 5 per 1800s (30 minutes), max 25.
         // When the player logs in, add a potential bonus of 0 to 5. If the counter is below 5 don't do this.
@@ -36,7 +39,7 @@ public class CloverListeners implements Listener {
         // If the player already has clovers waiting in the field from previous sessions, load that, and add it to the clovers that generated now.
         // If this value is non-zero don't add the random bonus.
 
-        counter = CloverDatabase.getCloversWaiting(p) +
+        counter = importedClovers +
                 (CloverDatabase.getLastSeen(p).until(Instant.now(), ChronoUnit.MINUTES) / 6);
 
         if (counter > 25) counter = 25;
@@ -46,10 +49,26 @@ public class CloverListeners implements Listener {
         }
 
         // Add all of these to a Set.
-        final Set<Location> locationSet = new HashSet<>();
-        for (; counter > 0; counter--) locationSet.add(getRandomCloverLocation(locationSet, p.getWorld()));
+        final Set<Location> cloverSet = new HashSet<>();
+        final Set<Location> fourLeafCloverSet = new HashSet<>();
 
-        CloverDisplayRunnable runnable = new CloverDisplayRunnable(p, locationSet);
+        // First add four-leaf clovers if there are any from previous sessions.
+        for (; counter > 0 && fourLeafClovers > 0; fourLeafClovers--, counter--) {
+            fourLeafCloverSet.add(getRandomCloverLocation(fourLeafCloverSet, p.getWorld(), CloverType.FOUR_LEAF_CLOVER));
+        }
+
+        // Next add the rest of the normal clovers.
+        for (; counter > 0; counter--, importedClovers--) {
+            // Every regular clover that spawns has a 1/200 (0.005) chance to be a four-leaf clover.
+            // This will only work for new clovers, not preloaded ones
+            if (importedClovers <= 0 && Math.random() < 0.005) {
+                fourLeafCloverSet.add(getRandomCloverLocation(fourLeafCloverSet, p.getWorld(), CloverType.FOUR_LEAF_CLOVER));
+            } else {
+                cloverSet.add(getRandomCloverLocation(cloverSet, p.getWorld(), CloverType.CLOVER));
+            }
+        }
+
+        CloverDisplayRunnable runnable = new CloverDisplayRunnable(p, cloverSet, fourLeafCloverSet);
 
         runnable.runTaskTimer(TravelFrog.getPlugin(), 1, 5);
         runnableMap.put(p, runnable);
@@ -83,7 +102,7 @@ public class CloverListeners implements Listener {
         // Check y-value, must be the set value or one higher
         if (clickedLoc.getY() == TravelFrog.getCloverYValue() || clickedLoc.getY() == TravelFrog.getCloverYValue() + 1) {
             // Check if they actually broke a clover
-            if (runnableMap.get(p).removeClover(clickedLoc)) {
+            if (runnableMap.get(p).removeClover(clickedLoc) == CloverType.CLOVER) {
                 incrementCloverCount(event.getPlayer(), 1);
             }
         }
@@ -122,7 +141,7 @@ public class CloverListeners implements Listener {
         score.setScore(score.getScore() + amount);
     }
 
-    private static Location getRandomCloverLocation(Set<Location> locationSet, World w) {
+    private static Location getRandomCloverLocation(Set<Location> locationSet, World w, CloverType type) {
         // TODO Will hardcode for now :)
         Random random = new Random();
 
@@ -150,7 +169,7 @@ public class CloverListeners implements Listener {
             if (contains) continue;
 
             // 30% chance that the clover spawns 1 higher than usual
-            if (Math.random() < 0.3) target.add(0, 1, 0);
+            if (type == CloverType.CLOVER && Math.random() < 0.3) target.add(0, 1, 0);
 
             return target;
         }

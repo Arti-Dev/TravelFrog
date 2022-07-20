@@ -1,8 +1,10 @@
 package com.articreep.travelfrog;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.SmallDripleaf;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -11,26 +13,28 @@ import java.util.Set;
 
 public class CloverDisplayRunnable extends BukkitRunnable {
     private final Set<Location> cloverSet;
+    private final Set<Location> fourLeafCloverSet;
     private final Player player;
     private static final SmallDripleaf topBlockData;
     private static final SmallDripleaf bottomBlockData;
+    private static final BlockData fourLeafData;
 
     static {
         topBlockData = (SmallDripleaf) Material.SMALL_DRIPLEAF.createBlockData();
         bottomBlockData = (SmallDripleaf) Material.SMALL_DRIPLEAF.createBlockData();
         topBlockData.setHalf(Bisected.Half.TOP);
         bottomBlockData.setHalf(Bisected.Half.BOTTOM);
+        fourLeafData = Material.MANGROVE_PROPAGULE.createBlockData();
     }
 
-    public CloverDisplayRunnable(Player player, Set<Location> cloverSet) {
+    public CloverDisplayRunnable(Player player, Set<Location> cloverSet, Set<Location> fourLeafCloverSet) {
         this.cloverSet = cloverSet;
         this.player = player;
+        this.fourLeafCloverSet = fourLeafCloverSet;
     }
 
     @Override
     public void run() {
-        // TODO Remember that these two checks exist.
-        if (cloverSet.isEmpty()) this.cancel();
 
         for (Location loc : cloverSet) {
             if (loc.getY() == TravelFrog.getCloverYValue()) {
@@ -43,9 +47,13 @@ public class CloverDisplayRunnable extends BukkitRunnable {
                 cloverSet.remove(loc);
             }
         }
+
+        for (Location loc : fourLeafCloverSet) {
+            player.sendBlockChange(loc, fourLeafData);
+        }
     }
 
-    public boolean removeClover(Location target) {
+    public CloverType removeClover(Location target) {
         if (cloverSet.removeIf((l) -> (l.getBlockX() == target.getBlockX() && l.getBlockZ() == target.getBlockZ()))) {
             player.sendBlockChange(target, target.getBlock().getBlockData());
             // Update the block above or the block below depending on where the player clicked.
@@ -57,22 +65,23 @@ public class CloverDisplayRunnable extends BukkitRunnable {
             }
             player.sendBlockChange(otherLoc, otherLoc.getBlock().getBlockData());
 
-            // When breaking blocks rapidly sometimes they don't update, so try sending another packet a tick later
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    player.sendBlockChange(target, target.getBlock().getBlockData());
-                    player.sendBlockChange(otherLoc, otherLoc.getBlock().getBlockData());
-                }
-            }.runTaskLater(TravelFrog.getPlugin(), 20);
-            return true;
+
+            return CloverType.CLOVER;
+        } else if (fourLeafCloverSet.remove(target)) {
+            player.sendBlockChange(target, target.getBlock().getBlockData());
+            player.sendMessage(ChatColor.GREEN + "You got a four-leaf clover! It doesn't help you right now though..");
+            return CloverType.FOUR_LEAF_CLOVER;
         }
-        return false;
+        return null;
 
     }
 
     public int getCloverAmount() {
-        return cloverSet.size();
+        return cloverSet.size() + fourLeafCloverSet.size();
+    }
+
+    public int getFourLeafCloverAmount() {
+        return fourLeafCloverSet.size();
     }
 
 }

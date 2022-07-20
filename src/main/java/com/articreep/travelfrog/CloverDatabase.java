@@ -57,6 +57,22 @@ public class CloverDatabase {
         }
     }
 
+    protected static int getFourLeafCloversWaiting(Player p) throws SQLException {
+        try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
+                "SELECT fourLeafCloversWaiting FROM clovertable WHERE uuid = ?"
+        )) {
+            stmt.setString(1, p.getUniqueId().toString());
+            ResultSet result = stmt.executeQuery();
+            if (result.next()) {
+                return result.getInt("fourLeafCloversWaiting");
+            } else {
+                // If they didn't exist before, add them!
+                addPlayer(p);
+                return 0;
+            }
+        }
+    }
+
     private static void addPlayer(Player p) throws SQLException {
         // Adds a new UUID into the database
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
@@ -98,6 +114,21 @@ public class CloverDatabase {
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new SQLException("Error while saving clovers waiting to database");
+        }
+        // Also update the four leaf clovers!
+        updateFourLeafCloversWaiting(p);
+    }
+
+    protected static void updateFourLeafCloversWaiting(Player p) throws SQLException {
+        CloverDisplayRunnable runnable = CloverListeners.runnableMap.get(p);
+        try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
+                "UPDATE clovertable SET fourLeafCloversWaiting = ? WHERE uuid = ?"
+        )) {
+            stmt.setLong(1, runnable.getFourLeafCloverAmount());
+            stmt.setString(2, p.getUniqueId().toString());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLException("Error while saving four-leaf clovers waiting to database");
         }
     }
 
