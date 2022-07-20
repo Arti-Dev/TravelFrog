@@ -34,27 +34,19 @@ public class CloverListeners implements Listener {
         long generatedClovers = (CloverDatabase.getLastSeen(p).until(Instant.now(), ChronoUnit.MINUTES) / 6);
         long counter;
 
-        // The counter increases 5 per 1800s (30 minutes), max 25.
-        // When the player logs in, add a potential bonus of 0 to 5. If the counter is below 5 don't do this.
-
-        // If the player already has clovers waiting in the field from previous sessions, load that, and add it to the clovers that generated now.
-        // If this value is non-zero don't add the random bonus.
+        // Load clovers from previous session.
 
         // If these imported clovers amount to 25 or higher, do not generate any new clovers.
-        // The reasoning of this is to encourage people to clear their entire field.
-        // If you leave one clover, you will not be eligible for the random bonus.
         if (importedClovers >= 25) {
-            // Here we import the existing clovers and do not add (what could have been) generated clovers.
             counter = importedClovers;
         } else {
-            // The imported clover count was below 25, so we can generate more.
-            // But the total can't go beyond 25.
+            // Total cannot go above 25
             counter = importedClovers + generatedClovers;
             if (counter > 25) counter = 25;
         }
 
-        // This is the bonus, from 0 to 5. There cannot be any imported clovers, and the counter must be above 5.
-        // This means that you'd have to clear your clover field and log off for 30 minutes for this bonus to apply next time you log in.
+        // This is the random bonus, from 0 to 5.
+        // There cannot be any imported clovers, and the counter must be above 5.
         if (importedClovers == 0 && counter > 5) {
             counter = counter + (int) (Math.random() * 5);
         }
@@ -66,19 +58,16 @@ public class CloverListeners implements Listener {
         final Set<Location> cloverSet = new HashSet<>();
         final Set<Location> fourLeafCloverSet = new HashSet<>();
 
-        // Four leaf clovers are NOT counted individually. They count towards the total clover count, but are stored in a separate Set.
-        // The total clover count is both set sizes combined.
+        // Four leaf clovers count towards the total clover count, but are stored in a separate Set.
 
-        // Every time a clover is generated the counter goes down by 1 until it reaches 0.
-        // First add four-leaf clovers if there are any from previous sessions.
+        // Add four-leaf clovers first
         for (; counter > 0 && fourLeafClovers > 0; fourLeafClovers--, counter--) {
             fourLeafCloverSet.add(getRandomCloverLocation(fourLeafCloverSet, p.getWorld(), CloverType.FOUR_LEAF_CLOVER));
         }
 
         // Next add the rest of the normal clovers.
         for (; counter > 0; counter--, importedClovers--) {
-            // Every regular clover that spawns has a 1/200 (0.005) chance to be a four-leaf clover.
-            // This will only work for new clovers, not preloaded ones
+            // Every regular clover that is newly generated has a 1/200 (0.005) chance to be a four-leaf clover.
             if (importedClovers <= 0 && Math.random() < 0.005) {
                 fourLeafCloverSet.add(getRandomCloverLocation(fourLeafCloverSet, p.getWorld(), CloverType.FOUR_LEAF_CLOVER));
             } else {
