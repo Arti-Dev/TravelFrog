@@ -1,0 +1,6 @@
+name: TravelFrog
+version: '${project.version}'
+main: com.articreep.travelfrog.TravelFrog
+api-version: 1.19
+authors: [ Arti_Creep ]
+description: Adapted from Hit-Point's Tabi-Kaeru - a game where you take care of a frog which travels to various places
