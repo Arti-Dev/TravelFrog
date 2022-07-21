@@ -1,7 +1,5 @@
 package com.articreep.travelfrog;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,7 +8,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.scoreboard.*;
 
 import java.sql.SQLException;
 import java.time.Instant;
@@ -19,19 +16,21 @@ import java.util.*;
 
 public class CloverListeners implements Listener {
 
-    protected static Map<Player, CloverDisplayRunnable> runnableMap = new HashMap<>();
+    protected static Map<UUID, CloverDisplayRunnable> runnableMap = new HashMap<>();
 
     @EventHandler
     protected void onPlayerJoin(PlayerJoinEvent event) throws SQLException {
         Player p = event.getPlayer();
-        displayScoreboardToPlayer(p);
+        UUID uuid = p.getUniqueId();
+
+        PlayerInventory.registerPlayer(p);
 
         // Spawn the clovers in the field.
 
         // Import the amount of four-leaf and regular clovers.
-        int fourLeafClovers = CloverDatabase.getFourLeafCloversWaiting(p);
-        int importedClovers = CloverDatabase.getCloversWaiting(p);
-        long generatedClovers = (CloverDatabase.getLastSeen(p).until(Instant.now(), ChronoUnit.MINUTES) / 6);
+        int fourLeafClovers = CloverDatabase.getFourLeafCloversWaiting(uuid);
+        int importedClovers = CloverDatabase.getCloversWaiting(uuid);
+        long generatedClovers = (CloverDatabase.getLastSeen(uuid).until(Instant.now(), ChronoUnit.SECONDS) / 6);
         long counter;
 
         // Load clovers from previous session.
@@ -68,7 +67,7 @@ public class CloverListeners implements Listener {
         // Next add the rest of the normal clovers.
         for (; counter > 0; counter--, importedClovers--) {
             // Every regular clover that is newly generated has a 1/200 (0.005) chance to be a four-leaf clover.
-            if (importedClovers <= 0 && Math.random() < 0.005) {
+            if (importedClovers <= 0 && Math.random() < 0.5) {
                 fourLeafCloverSet.add(getRandomCloverLocation(fourLeafCloverSet, p.getWorld(), CloverType.FOUR_LEAF_CLOVER));
             } else {
                 cloverSet.add(getRandomCloverLocation(cloverSet, p.getWorld(), CloverType.CLOVER));
@@ -79,24 +78,24 @@ public class CloverListeners implements Listener {
         CloverDisplayRunnable runnable = new CloverDisplayRunnable(p, cloverSet, fourLeafCloverSet);
 
         runnable.runTaskTimer(TravelFrog.getPlugin(), 1, 5);
-        runnableMap.put(p, runnable);
+        runnableMap.put(uuid, runnable);
+
 
         // I'll allow clovers to regen while they're online - but clovers will not spawn while they're online. They'll have to log back in.
         // This mechanic is actually present in the actual game!
-        CloverDatabase.updateLastSeen(event.getPlayer());
+        CloverDatabase.updateLastSeen(uuid);
     }
 
     @EventHandler
-    protected void onPlayerLeave(PlayerQuitEvent event) throws SQLException {
+    protected void onPlayerLeave(PlayerQuitEvent event) {
         // Basically save everything and remove them from the map
         // If they're not in the map somehow just return
-        Player p = event.getPlayer();
-        if (!runnableMap.containsKey(p)) return;
+        UUID uuid = event.getPlayer().getUniqueId();
+        PlayerInventory.unregisterPlayer(uuid);
 
-        CloverDatabase.updateClovers(p);
-        CloverDatabase.updateCloversWaiting(p);
-        runnableMap.get(p).cancel();
-        runnableMap.remove(p);
+        if (!runnableMap.containsKey(uuid)) return;
+        runnableMap.get(uuid).cancel();
+        runnableMap.remove(uuid);
     }
 
     @EventHandler
@@ -104,50 +103,24 @@ public class CloverListeners implements Listener {
         if (event.getClickedBlock() == null) return;
         if (event.getAction() != Action.LEFT_CLICK_BLOCK) return;
 
-        Player p = event.getPlayer();
+        UUID uuid = event.getPlayer().getUniqueId();
         Location clickedLoc = event.getClickedBlock().getLocation();
 
         // Check y-value, must be the set value or one higher
         if (clickedLoc.getY() == TravelFrog.getCloverYValue() || clickedLoc.getY() == TravelFrog.getCloverYValue() + 1) {
             // Check if they actually broke a clover
-            if (runnableMap.get(p).removeClover(clickedLoc) == CloverType.CLOVER) {
-                incrementCloverCount(event.getPlayer(), 1);
+            CloverType cloverType = runnableMap.get(uuid).removeClover(clickedLoc);
+            if (cloverType == null) return;
+            if (cloverType == CloverType.CLOVER) {
+                PlayerInventory.getPlayerInventory(uuid).incrementCloverCount(1);
+            } else if (cloverType == CloverType.FOUR_LEAF_CLOVER) {
+                PlayerInventory.getPlayerInventory(uuid).incrementFourLeafCloverCount(1);
             }
         }
     }
 
-    protected static void displayScoreboardToPlayer(Player p) {
-        int clovers;
 
-        //TODO put EVERYTHING in the try catch
 
-        try {
-            clovers = CloverDatabase.getClovers(p);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        ScoreboardManager manager = Bukkit.getScoreboardManager();
-        Scoreboard board = manager.getNewScoreboard();
-
-        Objective objective = board.registerNewObjective("Title", "dummy",
-                Component.text("Travel Frog").color(NamedTextColor.YELLOW), RenderType.INTEGER);
-        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-
-        Score score = objective.getScore(ChatColor.GREEN + "Clovers:");
-        score.setScore(clovers);
-
-        p.setScoreboard(board);
-    }
-
-    protected static void incrementCloverCount(Player p, int amount) {
-        // This increments only on the scoreboard. It does not save to SQL.
-        Scoreboard board = p.getScoreboard();
-        Objective objective = board.getObjective("Title");
-        Score score = objective.getScore(ChatColor.GREEN + "Clovers:");
-        score.setScore(score.getScore() + amount);
-    }
 
     private static Location getRandomCloverLocation(Set<Location> locationSet, World w, CloverType type) {
         // TODO Will hardcode for now :)

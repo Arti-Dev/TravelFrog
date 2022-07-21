@@ -69,7 +69,7 @@ public class CloverDisplayRunnable extends BukkitRunnable {
             return CloverType.CLOVER;
         } else if (fourLeafCloverSet.remove(target)) {
             player.sendBlockChange(target, target.getBlock().getBlockData());
-            player.sendMessage(ChatColor.GREEN + "You got a four-leaf clover! It doesn't help you right now though..");
+            player.sendMessage(ChatColor.GREEN + "You got a four-leaf clover! It's been added to your inventory.");
             return CloverType.FOUR_LEAF_CLOVER;
         }
         return null;

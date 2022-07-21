@@ -1,84 +1,84 @@
 package com.articreep.travelfrog;
 
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.*;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.Instant;
+import java.util.UUID;
 
 public class CloverDatabase {
 
-    protected static int getClovers(Player p) throws SQLException {
+    protected static int getClovers(UUID uuid) throws SQLException {
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "SELECT clovers FROM clovertable WHERE uuid = ?"
         )) {
-            stmt.setString(1, p.getUniqueId().toString());
+            stmt.setString(1, uuid.toString());
             ResultSet result = stmt.executeQuery();
             if (result.next()) {
                 return result.getInt("clovers");
             } else {
                 // If they didn't exist before, add them!
-                addPlayer(p);
+                addPlayer(uuid);
                 return 0;
             }
         }
     }
 
-    protected static int getCloversWaiting(Player p) throws SQLException {
+    protected static int getCloversWaiting(UUID uuid) throws SQLException {
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "SELECT cloversWaiting FROM clovertable WHERE uuid = ?"
         )) {
-            stmt.setString(1, p.getUniqueId().toString());
+            stmt.setString(1, uuid.toString());
             ResultSet result = stmt.executeQuery();
             if (result.next()) {
                 return result.getInt("cloversWaiting");
             } else {
                 // If they didn't exist before, add them!
-                addPlayer(p);
+                addPlayer(uuid);
                 return 25;
             }
         }
     }
 
-    protected static Instant getLastSeen(Player p) throws SQLException {
+    protected static Instant getLastSeen(UUID uuid) throws SQLException {
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "SELECT lastSeen FROM clovertable WHERE uuid = ?"
         )) {
-            stmt.setString(1, p.getUniqueId().toString());
+            stmt.setString(1, uuid.toString());
             ResultSet result = stmt.executeQuery();
             if (result.next()) {
                 return result.getTimestamp("lastSeen").toInstant();
             } else {
                 // If they didn't exist before, add them!
-                addPlayer(p);
+                addPlayer(uuid);
                 return Instant.now();
             }
         }
     }
 
-    protected static int getFourLeafCloversWaiting(Player p) throws SQLException {
+    protected static int getFourLeafCloversWaiting(UUID uuid) throws SQLException {
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "SELECT fourLeafCloversWaiting FROM clovertable WHERE uuid = ?"
         )) {
-            stmt.setString(1, p.getUniqueId().toString());
+            stmt.setString(1, uuid.toString());
             ResultSet result = stmt.executeQuery();
             if (result.next()) {
                 return result.getInt("fourLeafCloversWaiting");
             } else {
                 // If they didn't exist before, add them!
-                addPlayer(p);
+                addPlayer(uuid);
                 return 0;
             }
         }
     }
 
-    private static void addPlayer(Player p) throws SQLException {
+    private static void addPlayer(UUID uuid) throws SQLException {
         // Adds a new UUID into the database
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "INSERT INTO clovertable(uuid, clovers) VALUES(?, ?)"
         )) {
-            stmt.setString(1, p.getUniqueId().toString());
+            stmt.setString(1, uuid.toString());
             stmt.setInt(2, 0);
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -87,57 +87,59 @@ public class CloverDatabase {
 
     }
 
-    protected static void updateClovers(Player p) throws SQLException {
-        Scoreboard board = p.getScoreboard();
-        Objective objective = board.getObjective("Title");
-        if (objective == null) return;
-        Score score = objective.getScore(ChatColor.GREEN + "Clovers:");
+    protected static void updateClovers(PlayerInventory inventory) throws SQLException {
+
 
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "UPDATE clovertable SET clovers = ? WHERE uuid = ?"
         )) {
-            stmt.setLong(1, score.getScore());
-            stmt.setString(2, p.getUniqueId().toString());
+            stmt.setLong(1, inventory.getClovers());
+            stmt.setString(2, inventory.getUuid().toString());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new SQLException("Error while saving clovers to database");
         }
     }
 
-    protected static void updateCloversWaiting(Player p) throws SQLException {
-        CloverDisplayRunnable runnable = CloverListeners.runnableMap.get(p);
+    protected static void updateCloversWaiting(UUID uuid) throws SQLException {
+
+
+        CloverDisplayRunnable runnable = CloverListeners.runnableMap.get(uuid);
+        // The runnable is only null if the plugin was reloaded and a player hasn't relogged
+        // TODO We should really respawn clovers when the plugin reloads for everyone.
+        if (runnable == null) return;
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "UPDATE clovertable SET cloversWaiting = ? WHERE uuid = ?"
         )) {
             stmt.setLong(1, runnable.getCloverAmount());
-            stmt.setString(2, p.getUniqueId().toString());
+            stmt.setString(2, uuid.toString());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new SQLException("Error while saving clovers waiting to database");
         }
         // Also update the four leaf clovers!
-        updateFourLeafCloversWaiting(p);
+        updateFourLeafCloversWaiting(uuid);
     }
 
-    protected static void updateFourLeafCloversWaiting(Player p) throws SQLException {
-        CloverDisplayRunnable runnable = CloverListeners.runnableMap.get(p);
+    protected static void updateFourLeafCloversWaiting(UUID uuid) throws SQLException {
+        CloverDisplayRunnable runnable = CloverListeners.runnableMap.get(uuid);
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "UPDATE clovertable SET fourLeafCloversWaiting = ? WHERE uuid = ?"
         )) {
             stmt.setLong(1, runnable.getFourLeafCloverAmount());
-            stmt.setString(2, p.getUniqueId().toString());
+            stmt.setString(2, uuid.toString());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new SQLException("Error while saving four-leaf clovers waiting to database");
         }
     }
 
-    protected static void updateLastSeen(Player p) throws SQLException {
+    protected static void updateLastSeen(UUID uuid) throws SQLException {
 
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "UPDATE clovertable SET lastSeen = CURRENT_TIMESTAMP() WHERE uuid = ?"
         )) {
-            stmt.setString(1, p.getUniqueId().toString());
+            stmt.setString(1, uuid.toString());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new SQLException("Error while saving lastSeen to database");

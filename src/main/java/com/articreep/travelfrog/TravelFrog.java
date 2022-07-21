@@ -39,6 +39,7 @@ public final class TravelFrog extends JavaPlugin {
         }
 
         // Init SQL table if it doesn't already exist
+        // TODO do the other one
         String sql = "CREATE TABLE IF NOT EXISTS cloverTable(" +
                 "uuid CHAR(36) NOT NULL," +
                 "clovers INT DEFAULT 0 NOT NULL," +
@@ -56,12 +57,13 @@ public final class TravelFrog extends JavaPlugin {
         // Pull the clover height from the config
         cloverYValue = config.getInt("clovers.y-level");
 
-        // Get everyone's clover counts and show it to them
+        // Import everyone's data
         for (Player p : Bukkit.getOnlinePlayers()) {
-            CloverListeners.displayScoreboardToPlayer(p);
+            PlayerInventory.registerPlayer(p);
         }
 
         getServer().getPluginManager().registerEvents(new CloverListeners(), this);
+        getServer().getPluginManager().registerEvents(new InventoryListeners(), this);
 
 
     }
@@ -70,12 +72,7 @@ public final class TravelFrog extends JavaPlugin {
     public void onDisable() {
         // Save everyone's data
         for (Player p : Bukkit.getOnlinePlayers()) {
-            try {
-                CloverDatabase.updateClovers(p);
-                CloverDatabase.updateCloversWaiting(p);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            PlayerInventory.unregisterPlayer(p.getUniqueId());
         }
     }
 
