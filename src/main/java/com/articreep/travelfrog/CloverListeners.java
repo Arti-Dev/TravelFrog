@@ -30,7 +30,7 @@ public class CloverListeners implements Listener {
         // Import the amount of four-leaf and regular clovers.
         int fourLeafClovers = CloverDatabase.getFourLeafCloversWaiting(uuid);
         int importedClovers = CloverDatabase.getCloversWaiting(uuid);
-        long generatedClovers = (CloverDatabase.getLastSeen(uuid).until(Instant.now(), ChronoUnit.SECONDS) / 6);
+        long generatedClovers = (CloverDatabase.getLastSeen(uuid).until(Instant.now(), ChronoUnit.MINUTES) / 6);
         long counter;
 
         // Load clovers from previous session.
@@ -65,6 +65,7 @@ public class CloverListeners implements Listener {
         }
 
         // Next add the rest of the normal clovers.
+        // TODO there's an issue where four-leaf clovers can overlap with regular clovers. might wanna fix that.
         for (; counter > 0; counter--, importedClovers--) {
             // Every regular clover that is newly generated has a 1/200 (0.005) chance to be a four-leaf clover.
             if (importedClovers <= 0 && Math.random() < 0.5) {
