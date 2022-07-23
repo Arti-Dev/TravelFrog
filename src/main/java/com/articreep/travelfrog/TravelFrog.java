@@ -1,5 +1,6 @@
 package com.articreep.travelfrog;
 
+import com.articreep.travelfrog.playerdata.PlayerDataManager;
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
 import org.bukkit.Bukkit;
@@ -33,9 +34,10 @@ public final class TravelFrog extends JavaPlugin {
 
         // Test the connection, if it fails do not load the plugin
         try {
-            testDatabaseConnection(dataSource);
+            testDatabaseConnection();
         } catch (SQLException e) {
             e.printStackTrace();
+            getServer().getPluginManager().disablePlugin(this);
         }
 
         // Init SQL table if it doesn't already exist
@@ -59,7 +61,7 @@ public final class TravelFrog extends JavaPlugin {
 
         // Import everyone's data
         for (Player p : Bukkit.getOnlinePlayers()) {
-            PlayerInventory.registerPlayer(p);
+            PlayerDataManager.registerPlayer(p);
         }
 
         getServer().getPluginManager().registerEvents(new CloverListeners(), this);
@@ -72,7 +74,7 @@ public final class TravelFrog extends JavaPlugin {
     public void onDisable() {
         // Save everyone's data
         for (Player p : Bukkit.getOnlinePlayers()) {
-            PlayerInventory.unregisterPlayer(p.getUniqueId());
+            PlayerDataManager.unregisterPlayer(p.getUniqueId());
         }
     }
 
@@ -84,7 +86,7 @@ public final class TravelFrog extends JavaPlugin {
         return dataSource.getConnection();
     }
 
-    private void testDatabaseConnection(DataSource dataSource) throws SQLException {
+    private void testDatabaseConnection() throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
             if (!conn.isValid(1)) {
                 throw new SQLException("Could not establish database connection.");

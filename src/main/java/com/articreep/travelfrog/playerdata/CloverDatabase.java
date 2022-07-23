@@ -1,4 +1,8 @@
-package com.articreep.travelfrog;
+package com.articreep.travelfrog.playerdata;
+
+import com.articreep.travelfrog.CloverDisplayRunnable;
+import com.articreep.travelfrog.CloverListeners;
+import com.articreep.travelfrog.TravelFrog;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -87,7 +91,7 @@ public class CloverDatabase {
 
     }
 
-    protected static void updateClovers(PlayerInventory inventory) throws SQLException {
+    protected static void updateClovers(PlayerData inventory) throws SQLException {
 
 
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
@@ -102,9 +106,7 @@ public class CloverDatabase {
     }
 
     protected static void updateCloversWaiting(UUID uuid) throws SQLException {
-
-
-        CloverDisplayRunnable runnable = CloverListeners.runnableMap.get(uuid);
+        CloverDisplayRunnable runnable = PlayerDataManager.getPlayerInventory(uuid).getRunnable();
         // The runnable is only null if the plugin was reloaded and a player hasn't relogged
         // TODO We should really respawn clovers when the plugin reloads for everyone.
         if (runnable == null) return;
@@ -122,7 +124,7 @@ public class CloverDatabase {
     }
 
     protected static void updateFourLeafCloversWaiting(UUID uuid) throws SQLException {
-        CloverDisplayRunnable runnable = CloverListeners.runnableMap.get(uuid);
+        CloverDisplayRunnable runnable = PlayerDataManager.getPlayerInventory(uuid).getRunnable();
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "UPDATE clovertable SET fourLeafCloversWaiting = ? WHERE uuid = ?"
         )) {
@@ -135,7 +137,6 @@ public class CloverDatabase {
     }
 
     protected static void updateLastSeen(UUID uuid) throws SQLException {
-
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "UPDATE clovertable SET lastSeen = CURRENT_TIMESTAMP() WHERE uuid = ?"
         )) {

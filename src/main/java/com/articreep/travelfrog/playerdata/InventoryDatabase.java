@@ -1,10 +1,6 @@
-package com.articreep.travelfrog;
+package com.articreep.travelfrog.playerdata;
 
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
-import org.bukkit.scoreboard.Scoreboard;
+import com.articreep.travelfrog.TravelFrog;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -59,7 +55,7 @@ public class InventoryDatabase {
 
     }
 
-    protected static void updateFourLeafClovers(PlayerInventory inventory) throws SQLException {
+    protected static void updateFourLeafClovers(PlayerData inventory) throws SQLException {
 
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "UPDATE inventorytable SET fourLeafClover = ? WHERE uuid = ?"
@@ -72,7 +68,7 @@ public class InventoryDatabase {
         }
     }
 
-    protected static void updateLanterns(PlayerInventory inventory) throws SQLException {
+    protected static void updateLanterns(PlayerData inventory) throws SQLException {
 
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "UPDATE inventorytable SET lantern = ? WHERE uuid = ?"
