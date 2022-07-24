@@ -1,20 +1,15 @@
 package com.articreep.travelfrog.playerdata;
 
-import com.articreep.travelfrog.CloverDisplayRunnable;
-import com.articreep.travelfrog.CloverType;
-import com.articreep.travelfrog.TravelFrog;
-import com.articreep.travelfrog.Utils;
+import com.articreep.travelfrog.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scoreboard.*;
 
 import java.sql.SQLException;
@@ -23,6 +18,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public class PlayerData {
+    private static final NamespacedKey key = new NamespacedKey(TravelFrog.getPlugin(), "TravelFrogType");
 
     // Only used sometimes
     private final Player player;
@@ -41,8 +37,8 @@ public class PlayerData {
     protected void load() throws SQLException {
         clovers = CloverDatabase.getClovers(uuid);
         fourLeafClovers = InventoryDatabase.getFourLeafClovers(uuid);
-        addToInventory(Material.SMALL_DRIPLEAF);
         lanterns = InventoryDatabase.getLanterns(uuid);
+        addToInventory(ItemType.FOUR_LEAF_CLOVER, fourLeafClovers);
 
         // Spawn the clovers in the field.
 
@@ -138,7 +134,7 @@ public class PlayerData {
 
     public void incrementFourLeafCloverCount(int amount) {
         fourLeafClovers += amount;
-        addToInventory(Material.SMALL_DRIPLEAF);
+        addToInventory(ItemType.FOUR_LEAF_CLOVER, fourLeafClovers);
     }
 
     public void decrementFourLeafCloverCount(int amount) {
@@ -147,28 +143,47 @@ public class PlayerData {
 
     // TODO Testing purposes. Take an enum later.
     // TODO Account for the fact that stacks only go to 64!
-    private void addToInventory(Material material) {
-        if (fourLeafClovers == 0) return;
+    private void addToInventory(ItemType type, int amount) {
         // If the user doesn't have that item in the inventory yet, add it
+        // If the user has some in their inventory, just modify the lore and the amount
+        // If the user has multiple items with the same type in their inventory, modify the first one but remove the second one
+
         Inventory inv = player.getInventory();
-        if (!inv.contains(material)) {
-            ItemStack item = new ItemStack(material);
-            ItemMeta meta = item.getItemMeta();
-            meta.lore(Collections.singletonList(Component.text(fourLeafClovers)));
-            item.setItemMeta(meta);
-            item.setAmount(fourLeafClovers);
-            inv.addItem(item);
-        } else {
-            for (ItemStack item : inv.getContents()) {
-                if (item == null) continue;
-                if (item.getType() == material) {
-                    ItemMeta meta = item.getItemMeta();
-                    meta.lore(Collections.singletonList(Component.text(fourLeafClovers)));
-                    item.setItemMeta(meta);
-                    item.setAmount(fourLeafClovers);
+        boolean hasItem = false;
+        int currentIndex = -1;
+
+        for (ItemStack item : inv.getContents()) {
+            currentIndex++;
+            if (item == null) continue;
+            PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+            if (!container.has(key)) continue;
+            String string = container.get(key, PersistentDataType.STRING);
+            if (ItemType.valueOf(string) == type) {
+
+                if (hasItem) {
+                    inv.clear(currentIndex);
+                } else {
+                    hasItem = true;
+                    updateInventoryItem(item, type, amount);
                 }
             }
         }
+
+        if (!hasItem) {
+            ItemStack item = new ItemStack(type.getMaterial());
+            updateInventoryItem(item, type, amount);
+            inv.addItem(item);
+        }
+    }
+
+    private static void updateInventoryItem(ItemStack item, ItemType type, int amount) {
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(type.getName());
+        meta.lore(type.createLore(amount));
+        meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, type.toString());
+        item.setItemMeta(meta);
+        item.setAmount(amount);
+        item.setType(type.getMaterial());
     }
 
     private static void displayScoreboardToPlayer(UUID uuid, int clovers) {
