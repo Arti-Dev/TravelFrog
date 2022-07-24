@@ -55,26 +55,26 @@ public class InventoryDatabase {
 
     }
 
-    protected static void updateFourLeafClovers(PlayerData inventory) throws SQLException {
+    protected static void updateFourLeafClovers(PlayerData data) throws SQLException {
 
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "UPDATE inventorytable SET fourLeafClover = ? WHERE uuid = ?"
         )) {
-            stmt.setLong(1, inventory.getFourLeafClovers());
-            stmt.setString(2, inventory.getUuid().toString());
+            stmt.setLong(1, data.getFourLeafClovers());
+            stmt.setString(2, data.getUuid().toString());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new SQLException("Error while saving four-leaf clovers to database");
         }
     }
 
-    protected static void updateLanterns(PlayerData inventory) throws SQLException {
+    protected static void updateLanterns(PlayerData data) throws SQLException {
 
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "UPDATE inventorytable SET lantern = ? WHERE uuid = ?"
         )) {
-            stmt.setLong(1, inventory.getLanterns());
-            stmt.setString(2, inventory.getUuid().toString());
+            stmt.setLong(1, data.getLanterns());
+            stmt.setString(2, data.getUuid().toString());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new SQLException("Error while saving lanterns to database");

@@ -91,22 +91,22 @@ public class CloverDatabase {
 
     }
 
-    protected static void updateClovers(PlayerData inventory) throws SQLException {
+    protected static void updateClovers(PlayerData data) throws SQLException {
 
 
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "UPDATE clovertable SET clovers = ? WHERE uuid = ?"
         )) {
-            stmt.setLong(1, inventory.getClovers());
-            stmt.setString(2, inventory.getUuid().toString());
+            stmt.setLong(1, data.getClovers());
+            stmt.setString(2, data.getUuid().toString());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new SQLException("Error while saving clovers to database");
         }
     }
 
-    protected static void updateCloversWaiting(UUID uuid) throws SQLException {
-        CloverDisplayRunnable runnable = PlayerDataManager.getPlayerInventory(uuid).getRunnable();
+    protected static void updateCloversWaiting(PlayerData data) throws SQLException {
+        CloverDisplayRunnable runnable = data.getRunnable();
         // The runnable is only null if the plugin was reloaded and a player hasn't relogged
         // TODO We should really respawn clovers when the plugin reloads for everyone.
         if (runnable == null) return;
@@ -114,22 +114,22 @@ public class CloverDatabase {
                 "UPDATE clovertable SET cloversWaiting = ? WHERE uuid = ?"
         )) {
             stmt.setLong(1, runnable.getCloverAmount());
-            stmt.setString(2, uuid.toString());
+            stmt.setString(2, data.getUuid().toString());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new SQLException("Error while saving clovers waiting to database");
         }
         // Also update the four leaf clovers!
-        updateFourLeafCloversWaiting(uuid);
+        updateFourLeafCloversWaiting(data);
     }
 
-    protected static void updateFourLeafCloversWaiting(UUID uuid) throws SQLException {
-        CloverDisplayRunnable runnable = PlayerDataManager.getPlayerInventory(uuid).getRunnable();
+    protected static void updateFourLeafCloversWaiting(PlayerData data) throws SQLException {
+        CloverDisplayRunnable runnable = data.getRunnable();
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "UPDATE clovertable SET fourLeafCloversWaiting = ? WHERE uuid = ?"
         )) {
             stmt.setLong(1, runnable.getFourLeafCloverAmount());
-            stmt.setString(2, uuid.toString());
+            stmt.setString(2, data.getUuid().toString());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new SQLException("Error while saving four-leaf clovers waiting to database");

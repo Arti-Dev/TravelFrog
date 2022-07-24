@@ -1,10 +1,8 @@
 package com.articreep.travelfrog;
 
-import com.articreep.travelfrog.playerdata.CloverDatabase;
 import com.articreep.travelfrog.playerdata.PlayerData;
 import com.articreep.travelfrog.playerdata.PlayerDataManager;
 import org.bukkit.*;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -12,7 +10,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.sql.SQLException;
 import java.util.*;
 
 public class CloverListeners implements Listener {
@@ -35,7 +32,7 @@ public class CloverListeners implements Listener {
         if (event.getAction() != Action.LEFT_CLICK_BLOCK) return;
 
         UUID uuid = event.getPlayer().getUniqueId();
-        PlayerData data = PlayerDataManager.getPlayerInventory(uuid);
+        PlayerData data = PlayerDataManager.getPlayerData(uuid);
         Location clickedLoc = event.getClickedBlock().getLocation();
 
         // Check y-value, must be the set value or one higher

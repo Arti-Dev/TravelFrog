@@ -105,7 +105,7 @@ public class PlayerData {
     protected void save() {
         try {
             CloverDatabase.updateClovers(this);
-            CloverDatabase.updateCloversWaiting(uuid);
+            CloverDatabase.updateCloversWaiting(this);
             InventoryDatabase.updateLanterns(this);
             InventoryDatabase.updateFourLeafClovers(this);
         } catch (SQLException e) {
