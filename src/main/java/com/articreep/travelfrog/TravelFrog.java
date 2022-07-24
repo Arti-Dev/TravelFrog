@@ -8,7 +8,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -74,7 +73,7 @@ public final class TravelFrog extends JavaPlugin {
     public void onDisable() {
         // Save everyone's data
         for (Player p : Bukkit.getOnlinePlayers()) {
-            PlayerDataManager.unregisterPlayer(p.getUniqueId());
+            PlayerDataManager.savePlayerData(p.getUniqueId());
         }
     }
 
