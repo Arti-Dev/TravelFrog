@@ -9,7 +9,14 @@ import java.util.Set;
 
 public class Utils {
 
-    public static Location getRandomCloverLocation(Set<Location> locationSet, World w, CloverType type) {
+    /**
+     * Gets a random location where a clover can be placed. The location may change depending on the clover type.
+     * @param w The world to generate Locations for
+     * @param type Type of clover. Four-leaf clovers only spawn one block tall.
+     * @param locationSetToExclude When a location is generated, this method will check against this list and will try generating again if one matches.
+     * @return A valid Location for a clover to be spawned on.
+     */
+    public static Location getRandomCloverLocation(World w, CloverType type, Set<Location> locationSetToExclude) {
         // TODO Will hardcode for now :)
         Random random = new Random();
 
@@ -28,7 +35,7 @@ public class Utils {
 
             // Check if these coordinates are already in the Set
             boolean contains = false;
-            for (Location l : locationSet) {
+            for (Location l : locationSetToExclude) {
                 if (l.getBlockX() == x && l.getBlockZ() == z) {
                     contains = true;
                     break;

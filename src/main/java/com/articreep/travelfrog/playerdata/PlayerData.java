@@ -75,23 +75,32 @@ public class PlayerData {
             // Now that we know how many clovers to add to the field, start making some sets.
             final Set<Location> cloverSet = new HashSet<>();
             final Set<Location> fourLeafCloverSet = new HashSet<>();
+            final Set<Location> locationsUsed = new HashSet<>();
 
             // Four leaf clovers count towards the total clover count, but are stored in a separate Set.
 
             // Add four-leaf clovers first
-            for (; counter > 0 && fourLeafClovers > 0; fourLeafClovers--, counter--) {
-                fourLeafCloverSet.add(Utils.getRandomCloverLocation(fourLeafCloverSet, player.getWorld(), CloverType.FOUR_LEAF_CLOVER));
+            for (Location l; counter > 0 && fourLeafClovers > 0; fourLeafClovers--, counter--) {
+
+                l = Utils.getRandomCloverLocation(player.getWorld(), CloverType.FOUR_LEAF_CLOVER, locationsUsed);
+                fourLeafCloverSet.add(l);
+                locationsUsed.add(l);
+
             }
 
-            // Next add the rest of the normal clovers.
-            // TODO there's an issue where four-leaf clovers can overlap with regular clovers. might wanna fix that.
-            for (; counter > 0; counter--, importedClovers--) {
+            // Next add the rest of the normal clovers
+            for (Location l; counter > 0; counter--, importedClovers--) {
+
                 // Every regular clover that is newly generated has a 1/200 (0.005) chance to be a four-leaf clover.
                 if (importedClovers <= 0 && Math.random() < 0.005) {
-                    fourLeafCloverSet.add(Utils.getRandomCloverLocation(fourLeafCloverSet, player.getWorld(), CloverType.FOUR_LEAF_CLOVER));
+                    l = Utils.getRandomCloverLocation(player.getWorld(), CloverType.FOUR_LEAF_CLOVER, locationsUsed);
+                    fourLeafCloverSet.add(l);
                 } else {
-                    cloverSet.add(Utils.getRandomCloverLocation(cloverSet, player.getWorld(), CloverType.CLOVER));
+                    l = Utils.getRandomCloverLocation(player.getWorld(), CloverType.CLOVER, locationsUsed);
+                    cloverSet.add(l);
                 }
+                locationsUsed.add(l);
+
             }
 
             runnable = new CloverDisplayRunnable(player, cloverSet, fourLeafCloverSet);
