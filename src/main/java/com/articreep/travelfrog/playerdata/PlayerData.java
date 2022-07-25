@@ -24,10 +24,9 @@ public class PlayerData {
     private final Player player;
 
     private CloverDisplayRunnable runnable;
+    private Map<ItemType, Integer> itemMap = new HashMap<>();
     private final UUID uuid;
     private int clovers;
-    private int fourLeafClovers;
-    private int lanterns;
 
     protected PlayerData(Player player) {
         this.player = player;
@@ -36,9 +35,10 @@ public class PlayerData {
 
     protected void load() throws SQLException {
         clovers = CloverDatabase.getClovers(uuid);
-        fourLeafClovers = InventoryDatabase.getFourLeafClovers(uuid);
-        lanterns = InventoryDatabase.getLanterns(uuid);
-        addToInventory(ItemType.FOUR_LEAF_CLOVER, fourLeafClovers);
+        itemMap.put(ItemType.FOUR_LEAF_CLOVER, InventoryDatabase.getFourLeafClovers(uuid));
+        itemMap.put(ItemType.LANTERN, InventoryDatabase.getLanterns(uuid));
+        addToInventory(ItemType.FOUR_LEAF_CLOVER);
+        addToInventory(ItemType.LANTERN);
 
         // Spawn the clovers in the field.
 
@@ -132,23 +132,25 @@ public class PlayerData {
         updateScoreboard();
     }
 
-    public void incrementFourLeafCloverCount(int amount) {
-        fourLeafClovers += amount;
-        addToInventory(ItemType.FOUR_LEAF_CLOVER, fourLeafClovers);
+    public void incrementItemCount(ItemType type, int amount) {
+        itemMap.put(type, itemMap.get(type) + amount);
+        addToInventory(type);
     }
 
-    public void decrementFourLeafCloverCount(int amount) {
-        fourLeafClovers -= amount;
+    public void decrementItemCount(ItemType type, int amount) {
+        itemMap.put(type, itemMap.get(type) - amount);
+        addToInventory(type);
     }
 
     // TODO Testing purposes. Take an enum later.
     // TODO Account for the fact that stacks only go to 64!
-    private void addToInventory(ItemType type, int amount) {
+    private void addToInventory(ItemType type) {
         // If the user doesn't have that item in the inventory yet, add it
         // If the user has some in their inventory, just modify the lore and the amount
         // If the user has multiple items with the same type in their inventory, modify the first one but remove the second one
 
         Inventory inv = player.getInventory();
+        int amount = itemMap.get(type);
         boolean hasItem = false;
         int currentIndex = -1;
 
@@ -160,31 +162,22 @@ public class PlayerData {
             String string = container.get(key, PersistentDataType.STRING);
             if (ItemType.valueOf(string) == type) {
 
-                if (hasItem) {
+                if (hasItem || amount <= 0) {
                     inv.clear(currentIndex);
                 } else {
                     hasItem = true;
-                    updateInventoryItem(item, type, amount);
+                    Utils.updateInventoryItem(item, type, amount);
                 }
             }
         }
 
-        if (!hasItem) {
+        if (!hasItem && amount > 0) {
             ItemStack item = new ItemStack(type.getMaterial());
-            updateInventoryItem(item, type, amount);
+            Utils.updateInventoryItem(item, type, amount);
             inv.addItem(item);
         }
     }
 
-    private static void updateInventoryItem(ItemStack item, ItemType type, int amount) {
-        ItemMeta meta = item.getItemMeta();
-        meta.displayName(type.getName());
-        meta.lore(type.createLore(amount));
-        meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, type.toString());
-        item.setItemMeta(meta);
-        item.setAmount(amount);
-        item.setType(type.getMaterial());
-    }
 
     private static void displayScoreboardToPlayer(UUID uuid, int clovers) {
 
@@ -215,12 +208,8 @@ public class PlayerData {
         return clovers;
     }
 
-    public int getFourLeafClovers() {
-        return fourLeafClovers;
-    }
-
-    public int getLanterns() {
-        return lanterns;
+    public int getItemCount(ItemType type) {
+        return itemMap.get(type);
     }
 
     public UUID getUuid() {

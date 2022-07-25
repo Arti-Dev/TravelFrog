@@ -1,13 +1,23 @@
 package com.articreep.travelfrog;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
 public class Utils {
+    private static final NamespacedKey key = new NamespacedKey(TravelFrog.getPlugin(), "TravelFrogType");
 
     /**
      * Gets a random location where a clover can be placed. The location may change depending on the clover type.
@@ -49,5 +59,37 @@ public class Utils {
             return target;
         }
         return null;
+    }
+
+    public static ItemStack updateInventoryItem(ItemStack item, ItemType type, int amount) {
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(type.getName());
+        meta.lore(type.createLore(amount));
+        meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, type.toString());
+        item.setItemMeta(meta);
+        if (amount < 0) item.setAmount(1);
+        else item.setAmount(amount);
+        item.setType(type.getMaterial());
+        return item;
+    }
+
+    public static ItemStack createShopItem(ItemType type, int amount) {
+        ItemStack item = new ItemStack(type.getMaterial());
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(type.getName());
+        meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, type.toString());
+        List<Component> loreList = type.createLore(amount);
+        loreList.add(Component.text(""));
+        loreList.add(Component.text("Cost: ", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
+                .append(Component.text().content(type.getPrice() + " Clovers").color(NamedTextColor.GREEN).build()));
+        meta.lore(loreList);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    public static ItemType getItemType(ItemStack item) {
+        PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+        if (!container.has(key)) return null;
+        return ItemType.valueOf(container.get(key, PersistentDataType.STRING));
     }
 }

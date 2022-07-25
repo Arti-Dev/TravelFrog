@@ -43,7 +43,7 @@ public class CloverListeners implements Listener {
             if (cloverType == CloverType.CLOVER) {
                 data.incrementCloverCount(1);
             } else if (cloverType == CloverType.FOUR_LEAF_CLOVER) {
-                data.incrementFourLeafCloverCount(1);
+                data.incrementItemCount(ItemType.FOUR_LEAF_CLOVER, 1);
             }
         }
     }

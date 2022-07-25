@@ -1,5 +1,6 @@
 package com.articreep.travelfrog.playerdata;
 
+import com.articreep.travelfrog.ItemType;
 import com.articreep.travelfrog.TravelFrog;
 
 import java.sql.Connection;
@@ -60,7 +61,7 @@ public class InventoryDatabase {
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "UPDATE inventorytable SET fourLeafClover = ? WHERE uuid = ?"
         )) {
-            stmt.setLong(1, data.getFourLeafClovers());
+            stmt.setLong(1, data.getItemCount(ItemType.FOUR_LEAF_CLOVER));
             stmt.setString(2, data.getUuid().toString());
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -73,7 +74,7 @@ public class InventoryDatabase {
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "UPDATE inventorytable SET lantern = ? WHERE uuid = ?"
         )) {
-            stmt.setLong(1, data.getLanterns());
+            stmt.setLong(1, data.getItemCount(ItemType.LANTERN));
             stmt.setString(2, data.getUuid().toString());
             stmt.executeUpdate();
         } catch (SQLException e) {
