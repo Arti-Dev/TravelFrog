@@ -12,11 +12,13 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum ItemType {
-    FOUR_LEAF_CLOVER(Material.MANGROVE_PROPAGULE, -1, Component.text("Four-leaf Clover").color(NamedTextColor.GREEN),
-            Component.text("It's some kind of good-luck charm.").color(NamedTextColor.GREEN)),
-    LANTERN(Material.LANTERN, 600, Component.text("Lantern").color(NamedTextColor.YELLOW),
-            Component.text("An excellent and very portable light source.").color(NamedTextColor.YELLOW)),
-    BREAD(Material.BREAD, 10, Component.text("Bread").color(NamedTextColor.GOLD),
+    FOUR_LEAF_CLOVER(Material.MANGROVE_PROPAGULE, -1, Component.text("Four-leaf Clover", NamedTextColor.GREEN)
+            .decoration(TextDecoration.ITALIC, false),
+            Component.text("It's some kind of good-luck charm.", NamedTextColor.GREEN)),
+    LANTERN(Material.LANTERN, 600, Component.text("Lantern", NamedTextColor.YELLOW).
+            decoration(TextDecoration.ITALIC, false),
+            Component.text("An excellent and very portable light source.", NamedTextColor.YELLOW)),
+    BREAD(Material.BREAD, 10, Component.text("Bread", NamedTextColor.GOLD),
             Component.text("Three wheat.").color(NamedTextColor.GRAY));
 
     private final int price;
