@@ -37,8 +37,10 @@ public class PlayerData {
         clovers = CloverDatabase.getClovers(uuid);
         itemMap.put(ItemType.FOUR_LEAF_CLOVER, InventoryDatabase.getFourLeafClovers(uuid));
         itemMap.put(ItemType.LANTERN, InventoryDatabase.getLanterns(uuid));
-        addToInventory(ItemType.FOUR_LEAF_CLOVER);
-        addToInventory(ItemType.LANTERN);
+        itemMap.put(ItemType.BREAD, InventoryDatabase.getBread(uuid));
+        for (ItemType type : ItemType.values()) {
+            addToInventory(type);
+        }
 
         // Spawn the clovers in the field.
 
@@ -115,6 +117,7 @@ public class PlayerData {
             CloverDatabase.updateCloversWaiting(this);
             InventoryDatabase.updateLanterns(this);
             InventoryDatabase.updateFourLeafClovers(this);
+            InventoryDatabase.updateBread(this);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -142,8 +145,6 @@ public class PlayerData {
         addToInventory(type);
     }
 
-    // TODO Testing purposes. Take an enum later.
-    // TODO Account for the fact that stacks only go to 64!
     private void addToInventory(ItemType type) {
         // If the user doesn't have that item in the inventory yet, add it
         // If the user has some in their inventory, just modify the lore and the amount
@@ -174,6 +175,7 @@ public class PlayerData {
         if (!hasItem && amount > 0) {
             ItemStack item = new ItemStack(type.getMaterial());
             Utils.updateInventoryItem(item, type, amount);
+            //TODO Ensure this item is not stored in the hotbar
             inv.addItem(item);
         }
     }

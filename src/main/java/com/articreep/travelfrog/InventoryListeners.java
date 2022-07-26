@@ -35,36 +35,5 @@ public class InventoryListeners implements Listener {
         }
     }
 
-    @EventHandler
-    public void onShopClick(InventoryClickEvent event) {
-        Inventory inv = event.getInventory();
-        if (inv.getHolder() == null) {
-            if (event.getView().title().equals(Component.text("Buy Item"))) {
-                event.setCancelled(true);
-                ItemStack item;
-                try {
-                    item = inv.getItem(event.getSlot());
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    return;
-                }
-                if (item == null) return;
-                ItemType type = Utils.getItemType(item);
-                if (type == null) return;
-
-                int price = type.getPrice();
-                Player p = (Player) event.getWhoClicked();
-                PlayerData data = PlayerDataManager.getPlayerData(p.getUniqueId());
-                if (data.getClovers() < price) {
-                    p.closeInventory();
-                    p.sendMessage(ChatColor.RED + "Not enough clovers.");
-                    return;
-                }
-                data.decrementCloverCount(price);
-                data.incrementItemCount(type, 1);
-                p.closeInventory();
-                p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
-            }
-        }
-    }
 
 }

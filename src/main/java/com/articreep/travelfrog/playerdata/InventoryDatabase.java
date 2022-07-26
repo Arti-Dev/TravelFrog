@@ -43,6 +43,22 @@ public class InventoryDatabase {
         }
     }
 
+    protected static int getBread(UUID uuid) throws SQLException {
+        try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
+                "SELECT bread FROM inventorytable WHERE uuid = ?"
+        )) {
+            stmt.setString(1, uuid.toString());
+            ResultSet result = stmt.executeQuery();
+            if (result.next()) {
+                return result.getInt("bread");
+            } else {
+                // If they didn't exist before, add them!
+                addPlayer(uuid);
+                return 0;
+            }
+        }
+    }
+
     private static void addPlayer(UUID uuid) throws SQLException {
         // Adds a new UUID into the database
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
@@ -79,6 +95,19 @@ public class InventoryDatabase {
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new SQLException("Error while saving lanterns to database");
+        }
+    }
+
+    protected static void updateBread(PlayerData data) throws SQLException {
+
+        try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
+                "UPDATE inventorytable SET bread = ? WHERE uuid = ?"
+        )) {
+            stmt.setLong(1, data.getItemCount(ItemType.BREAD));
+            stmt.setString(2, data.getUuid().toString());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLException("Error while saving bread to database");
         }
     }
 

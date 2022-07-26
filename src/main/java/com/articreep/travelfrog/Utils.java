@@ -68,7 +68,7 @@ public class Utils {
         meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, type.toString());
         item.setItemMeta(meta);
         if (amount < 0) item.setAmount(1);
-        else item.setAmount(amount);
+        else item.setAmount(Math.min(amount, 64));
         item.setType(type.getMaterial());
         return item;
     }
@@ -82,6 +82,9 @@ public class Utils {
         loreList.add(Component.text(""));
         loreList.add(Component.text("Cost: ", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
                 .append(Component.text().content(type.getPrice() + " Clovers").color(NamedTextColor.GREEN).build()));
+        if (type.isSingleItem() && amount >= 1) {
+            loreList.add(Component.text("You already bought this item!", NamedTextColor.RED));
+        }
         meta.lore(loreList);
         item.setItemMeta(meta);
         return item;
