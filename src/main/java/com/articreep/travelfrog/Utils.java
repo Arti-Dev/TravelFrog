@@ -73,6 +73,18 @@ public class Utils {
         return item;
     }
 
+    // For the backpack and the table
+    public static ItemStack createDisplayItem(ItemType type) {
+        if (type == ItemType.NONE) return new ItemStack(Material.BARRIER);
+        ItemStack item = new ItemStack(type.getMaterial());
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(type.getName());
+        // meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, type.toString());
+        meta.lore(type.getRawLore());
+        item.setItemMeta(meta);
+        return item;
+    }
+
     public static ItemStack createShopItem(ItemType type, int amount) {
         ItemStack item = new ItemStack(type.getMaterial());
         ItemMeta meta = item.getItemMeta();

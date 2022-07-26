@@ -20,7 +20,8 @@ public enum ItemType {
             decoration(TextDecoration.ITALIC, false),
             Component.text("An excellent and very portable light source.", NamedTextColor.YELLOW)),
     BREAD(Material.BREAD, 10, false, Component.text("Bread", NamedTextColor.GOLD),
-            Component.text("Three wheat.").color(NamedTextColor.GRAY));
+            Component.text("Three wheat.").color(NamedTextColor.GRAY)),
+    NONE(null, 0, true, null);
 
     private final int price;
     private final boolean singleItem;
@@ -42,6 +43,10 @@ public enum ItemType {
 
     public Component getName() {
         return name;
+    }
+
+    public List<Component> getRawLore() {
+        return new ArrayList<>(Arrays.asList(lore));
     }
 
     public List<Component> createLore(int quantity) {

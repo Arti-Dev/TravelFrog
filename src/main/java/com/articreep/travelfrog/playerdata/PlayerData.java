@@ -3,11 +3,13 @@ package com.articreep.travelfrog.playerdata;
 import com.articreep.travelfrog.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scoreboard.*;
@@ -24,7 +26,9 @@ public class PlayerData {
     private final Player player;
 
     private CloverDisplayRunnable runnable;
-    private Map<ItemType, Integer> itemMap = new HashMap<>();
+    private final Map<ItemType, Integer> itemMap = new HashMap<>();
+    // fixed size list
+    private final List<ItemType> backpack = Arrays.asList(new ItemType[4]);
     private final UUID uuid;
     private int clovers;
 
@@ -39,7 +43,14 @@ public class PlayerData {
         itemMap.put(ItemType.LANTERN, InventoryDatabase.getLanterns(uuid));
         itemMap.put(ItemType.BREAD, InventoryDatabase.getBread(uuid));
         for (ItemType type : ItemType.values()) {
+            // except NONE lol
+            if (type == ItemType.NONE) continue;
             addToInventory(type);
+        }
+        int index = -1;
+        for (ItemType type : BackpackDatabase.getContents(uuid)) {
+            index++;
+            backpack.set(index, type);
         }
 
         // Spawn the clovers in the field.
@@ -118,6 +129,7 @@ public class PlayerData {
             InventoryDatabase.updateLanterns(this);
             InventoryDatabase.updateFourLeafClovers(this);
             InventoryDatabase.updateBread(this);
+            BackpackDatabase.updateBackpack(this);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -143,6 +155,10 @@ public class PlayerData {
     public void decrementItemCount(ItemType type, int amount) {
         itemMap.put(type, itemMap.get(type) - amount);
         addToInventory(type);
+    }
+
+    public void setInBackpack(int index, ItemType type) {
+        backpack.set(index, type);
     }
 
     private void addToInventory(ItemType type) {
@@ -220,5 +236,9 @@ public class PlayerData {
 
     public CloverDisplayRunnable getRunnable() {
         return runnable;
+    }
+
+    public List<ItemType> getBackpack() {
+        return backpack;
     }
 }
