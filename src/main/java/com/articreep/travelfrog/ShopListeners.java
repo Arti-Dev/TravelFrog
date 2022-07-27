@@ -42,9 +42,9 @@ public class ShopListeners implements Listener {
 
                 event.setCancelled(true);
                 Player p = event.getPlayer();
-                int playerHas = PlayerDataManager.getPlayerData(p.getUniqueId()).getItemCount(type);
+                PlayerData data = PlayerDataManager.getPlayerData(p.getUniqueId());
                 Inventory inv = Bukkit.createInventory(null, 27, Component.text("Buy Item"));
-                inv.setItem(13, Utils.createShopItem(type, playerHas));
+                inv.setItem(13, Utils.createShopItem(type, data.getItemCount(type), data.hasSingleItem(type)));
                 p.openInventory(inv);
             }
         }
@@ -96,12 +96,13 @@ public class ShopListeners implements Listener {
                 PlayerData data = PlayerDataManager.getPlayerData(p.getUniqueId());
 
                 if (type.isSingleItem()) {
-                    if (data.getItemCount(type) >= 1) {
+                    if (data.hasSingleItem(type)) {
                         p.closeInventory();
                         p.sendMessage(ChatColor.RED + "You already bought this item!");
                         return;
                     }
                 }
+
                 if (data.getClovers() < price) {
                     p.closeInventory();
                     p.sendMessage(ChatColor.RED + "Not enough clovers.");

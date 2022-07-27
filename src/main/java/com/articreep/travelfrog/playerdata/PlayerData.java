@@ -27,6 +27,9 @@ public class PlayerData {
 
     private CloverDisplayRunnable runnable;
     private final Map<ItemType, Integer> itemMap = new HashMap<>();
+    // hasTool is updated on backpack/table load and inventory load (addToInventory method).
+    // it determines whether a user possesses a single-buy item.
+    private final Set<ItemType> hasSingleItem = new HashSet<>();
     // fixed size list
     private final List<ItemType> backpack = Arrays.asList(new ItemType[4]);
     private final List<ItemType> table = Arrays.asList(new ItemType[8]);
@@ -51,11 +54,13 @@ public class PlayerData {
         int index = -1;
         for (ItemType type : BackpackDatabase.getContents(uuid)) {
             index++;
+            if (type.isSingleItem()) hasSingleItem.add(type);
             backpack.set(index, type);
         }
         index = -1;
         for (ItemType type : TableDatabase.getContents(uuid)) {
             index++;
+            if (type.isSingleItem()) hasSingleItem.add(type);
             table.set(index, type);
         }
 
@@ -198,6 +203,12 @@ public class PlayerData {
         boolean hasItem = false;
         int currentIndex = -1;
 
+        if (type.isSingleItem()) {
+            if (amount > 0) {
+                hasSingleItem.add(type);
+            }
+        }
+
         for (ItemStack item : inv.getContents()) {
             currentIndex++;
             if (item == null) continue;
@@ -271,5 +282,9 @@ public class PlayerData {
 
     public List<ItemType> getTable() {
         return table;
+    }
+
+    public boolean hasSingleItem(ItemType type) {
+        return hasSingleItem.contains(type);
     }
 }

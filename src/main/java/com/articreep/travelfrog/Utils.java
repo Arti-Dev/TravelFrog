@@ -92,7 +92,7 @@ public class Utils {
         return item;
     }
 
-    public static ItemStack createShopItem(ItemType type, int amount) {
+    public static ItemStack createShopItem(ItemType type, int amount, boolean alreadyBought) {
         ItemStack item = new ItemStack(type.getMaterial());
         ItemMeta meta = item.getItemMeta();
         meta.displayName(type.getName());
@@ -101,7 +101,7 @@ public class Utils {
         loreList.add(Component.text(""));
         loreList.add(Component.text("Cost: ", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
                 .append(Component.text().content(type.getPrice() + " Clovers").color(NamedTextColor.GREEN).build()));
-        if (type.isSingleItem() && amount >= 1) {
+        if (alreadyBought) {
             loreList.add(Component.text("You already bought this item!", NamedTextColor.RED));
         }
         meta.lore(loreList);
