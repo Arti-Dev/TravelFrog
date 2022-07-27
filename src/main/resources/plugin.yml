@@ -8,3 +8,6 @@ commands:
   backpack:
     description: Opens the backpack.
     usage: /backpack
+  table:
+    description: Opens the table.
+    usage: /table

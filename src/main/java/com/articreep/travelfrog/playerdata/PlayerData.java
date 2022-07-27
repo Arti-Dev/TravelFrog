@@ -29,6 +29,7 @@ public class PlayerData {
     private final Map<ItemType, Integer> itemMap = new HashMap<>();
     // fixed size list
     private final List<ItemType> backpack = Arrays.asList(new ItemType[4]);
+    private final List<ItemType> table = Arrays.asList(new ItemType[8]);
     private final UUID uuid;
     private int clovers;
 
@@ -51,6 +52,11 @@ public class PlayerData {
         for (ItemType type : BackpackDatabase.getContents(uuid)) {
             index++;
             backpack.set(index, type);
+        }
+        index = -1;
+        for (ItemType type : TableDatabase.getContents(uuid)) {
+            index++;
+            table.set(index, type);
         }
 
         // Spawn the clovers in the field.
@@ -130,6 +136,7 @@ public class PlayerData {
             InventoryDatabase.updateFourLeafClovers(this);
             InventoryDatabase.updateBread(this);
             BackpackDatabase.updateBackpack(this);
+            TableDatabase.updateTable(this);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -148,17 +155,37 @@ public class PlayerData {
     }
 
     public void incrementItemCount(ItemType type, int amount) {
+        if (type == ItemType.NONE) return;
         itemMap.put(type, itemMap.get(type) + amount);
         addToInventory(type);
     }
 
     public void decrementItemCount(ItemType type, int amount) {
+        if (type == ItemType.NONE) return;
         itemMap.put(type, itemMap.get(type) - amount);
         addToInventory(type);
     }
 
     public void setInBackpack(int index, ItemType type) {
+        decrementItemCount(type, 1);
+        incrementItemCount(backpack.get(index), 1);
         backpack.set(index, type);
+    }
+
+    public void setInTable(int index, ItemType type) {
+        decrementItemCount(type, 1);
+        incrementItemCount(table.get(index), 1);
+        table.set(index, type);
+    }
+
+    public void removeFromBackpack(int index) {
+        incrementItemCount(backpack.get(index), 1);
+        backpack.set(index, ItemType.NONE);
+    }
+
+    public void removeFromTable(int index) {
+        incrementItemCount(table.get(index), 1);
+        table.set(index, ItemType.NONE);
     }
 
     private void addToInventory(ItemType type) {
@@ -240,5 +267,9 @@ public class PlayerData {
 
     public List<ItemType> getBackpack() {
         return backpack;
+    }
+
+    public List<ItemType> getTable() {
+        return table;
     }
 }

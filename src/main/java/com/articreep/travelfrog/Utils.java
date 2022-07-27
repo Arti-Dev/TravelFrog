@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -75,11 +76,17 @@ public class Utils {
 
     // For the backpack and the table
     public static ItemStack createDisplayItem(ItemType type) {
-        if (type == ItemType.NONE) return new ItemStack(Material.BARRIER);
+        if (type == ItemType.NONE) {
+            ItemStack item = new ItemStack(Material.BARRIER);
+            ItemMeta meta = item.getItemMeta();
+            meta.lore(Collections.singletonList(Component.text("Click an item in your inventory!", NamedTextColor.RED)));
+            item.setItemMeta(meta);
+            return item;
+        }
         ItemStack item = new ItemStack(type.getMaterial());
         ItemMeta meta = item.getItemMeta();
         meta.displayName(type.getName());
-        // meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, type.toString());
+        // meta.getPersistentDataContainer().set(menuKey, PersistentDataType.BYTE, (byte) 1);
         meta.lore(type.getRawLore());
         item.setItemMeta(meta);
         return item;

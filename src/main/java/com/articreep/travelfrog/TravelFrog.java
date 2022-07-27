@@ -69,6 +69,7 @@ public final class TravelFrog extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ShopListeners(), this);
 
         getCommand("backpack").setExecutor(new Backpack());
+        getCommand("table").setExecutor(new Table());
 
 
     }
