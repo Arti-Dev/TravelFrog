@@ -52,10 +52,9 @@ public class BackpackDatabase {
                 "UPDATE backpack SET foodSlot = ?, charmSlot = ?, toolSlot1 = ?, toolSlot2 = ? WHERE uuid = ?"
         )) {
             List<ItemType> list = data.getBackpack();
-            stmt.setString(1, list.get(0).toString());
-            stmt.setString(2, list.get(1).toString());
-            stmt.setString(3, list.get(2).toString());
-            stmt.setString(4, list.get(3).toString());
+            for (int i = 0; i < 3; i++) {
+                stmt.setString(i+1, list.get(i).name());
+            }
             stmt.setString(5, data.getUuid().toString());
             stmt.executeUpdate();
         } catch (SQLException e) {

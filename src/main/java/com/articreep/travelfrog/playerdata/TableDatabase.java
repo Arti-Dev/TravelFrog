@@ -56,14 +56,9 @@ public class TableDatabase {
                         " toolSlot1 = ?, toolSlot2 = ?, toolSlot3 = ?, toolSlot4 = ? WHERE uuid = ?"
         )) {
             List<ItemType> list = data.getTable();
-            stmt.setString(1, list.get(0).toString());
-            stmt.setString(2, list.get(1).toString());
-            stmt.setString(3, list.get(2).toString());
-            stmt.setString(4, list.get(3).toString());
-            stmt.setString(5, list.get(4).toString());
-            stmt.setString(6, list.get(5).toString());
-            stmt.setString(7, list.get(6).toString());
-            stmt.setString(8, list.get(7).toString());
+            for (int i = 0; i < 7; i++) {
+                stmt.setString(i+1, list.get(i).name());
+            }
             stmt.setString(9, data.getUuid().toString());
             stmt.executeUpdate();
         } catch (SQLException e) {

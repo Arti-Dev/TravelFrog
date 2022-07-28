@@ -35,6 +35,7 @@ public class PlayerData {
     private final List<ItemType> table = Arrays.asList(new ItemType[8]);
     private final UUID uuid;
     private int clovers;
+    private int tickets;
 
     protected PlayerData(Player player) {
         this.player = player;

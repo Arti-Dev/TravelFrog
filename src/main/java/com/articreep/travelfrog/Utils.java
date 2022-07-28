@@ -66,7 +66,7 @@ public class Utils {
         ItemMeta meta = item.getItemMeta();
         meta.displayName(type.getName());
         meta.lore(type.createLore(amount));
-        meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, type.toString());
+        meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, type.name());
         item.setItemMeta(meta);
         if (amount < 0) item.setAmount(1);
         else item.setAmount(Math.min(amount, 64));
@@ -96,7 +96,7 @@ public class Utils {
         ItemStack item = new ItemStack(type.getMaterial());
         ItemMeta meta = item.getItemMeta();
         meta.displayName(type.getName());
-        meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, type.toString());
+        meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, type.name());
         List<Component> loreList = type.createLore(amount);
         loreList.add(Component.text(""));
         loreList.add(Component.text("Cost: ", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)

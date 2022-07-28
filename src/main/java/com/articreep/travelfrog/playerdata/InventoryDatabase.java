@@ -21,7 +21,7 @@ public class InventoryDatabase {
             ResultSet result = stmt.executeQuery();
             if (result.next()) {
                 for (ItemType type : ItemType.valuesList()) {
-                    resultMap.put(type, result.getInt(type.toString()));
+                    resultMap.put(type, result.getInt(type.name()));
                 }
                 return resultMap;
             } else {
