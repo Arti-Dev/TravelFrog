@@ -26,7 +26,7 @@ public class PlayerData {
     private final Player player;
 
     private CloverDisplayRunnable runnable;
-    private final Map<ItemType, Integer> itemMap = new HashMap<>();
+    private Map<ItemType, Integer> itemMap;
     // hasTool is updated on backpack/table load and inventory load (addToInventory method).
     // it determines whether a user possesses a single-buy item.
     private final Set<ItemType> hasSingleItem = new HashSet<>();
@@ -43,25 +43,21 @@ public class PlayerData {
 
     protected void load() throws SQLException {
         clovers = CloverDatabase.getClovers(uuid);
-        itemMap.put(ItemType.FOUR_LEAF_CLOVER, InventoryDatabase.getFourLeafClovers(uuid));
-        itemMap.put(ItemType.LANTERN, InventoryDatabase.getLanterns(uuid));
-        itemMap.put(ItemType.BREAD, InventoryDatabase.getBread(uuid));
-        for (ItemType type : ItemType.values()) {
-            // except NONE lol
-            if (type == ItemType.NONE) continue;
+        itemMap = InventoryDatabase.getInventory(uuid);
+        for (ItemType type : ItemType.valuesList()) {
             addToInventory(type);
         }
-        int index = -1;
+        int index = 0;
         for (ItemType type : BackpackDatabase.getContents(uuid)) {
-            index++;
             if (type.isSingleItem()) hasSingleItem.add(type);
             backpack.set(index, type);
-        }
-        index = -1;
-        for (ItemType type : TableDatabase.getContents(uuid)) {
             index++;
+        }
+        index = 0;
+        for (ItemType type : TableDatabase.getContents(uuid)) {
             if (type.isSingleItem()) hasSingleItem.add(type);
             table.set(index, type);
+            index++;
         }
 
         // Spawn the clovers in the field.
@@ -137,9 +133,7 @@ public class PlayerData {
         try {
             CloverDatabase.updateClovers(this);
             CloverDatabase.updateCloversWaiting(this);
-            InventoryDatabase.updateLanterns(this);
-            InventoryDatabase.updateFourLeafClovers(this);
-            InventoryDatabase.updateBread(this);
+            InventoryDatabase.updateInventory(this);
             BackpackDatabase.updateBackpack(this);
             TableDatabase.updateTable(this);
         } catch (SQLException e) {

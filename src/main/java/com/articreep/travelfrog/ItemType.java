@@ -69,4 +69,17 @@ public enum ItemType {
     public ItemCategory getCategory() {
         return category;
     }
+
+    /**
+     * Returns a list of all enums EXCEPT the NONE enum.
+     * @return list of all enums except NONE
+     */
+    public static List<ItemType> valuesList() {
+        List<ItemType> list = new ArrayList<>(Arrays.asList(values()));
+        list.remove(ItemType.NONE);
+        return list;
+    }
+
+
+
 }

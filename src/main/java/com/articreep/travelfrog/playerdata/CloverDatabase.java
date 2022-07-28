@@ -108,7 +108,6 @@ public class CloverDatabase {
     protected static void updateCloversWaiting(PlayerData data) throws SQLException {
         CloverDisplayRunnable runnable = data.getRunnable();
         // The runnable is only null if the plugin was reloaded and a player hasn't relogged
-        // TODO We should really respawn clovers when the plugin reloads for everyone.
         if (runnable == null) return;
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
                 "UPDATE clovertable SET cloversWaiting = ? WHERE uuid = ?"

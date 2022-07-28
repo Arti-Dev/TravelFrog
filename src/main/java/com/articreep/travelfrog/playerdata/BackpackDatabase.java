@@ -16,7 +16,7 @@ public class BackpackDatabase {
     private static void addPlayer(UUID uuid) throws SQLException {
         // Adds a new UUID into the database
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
-                "INSERT INTO backpacktable(uuid) VALUES(?)"
+                "INSERT INTO backpack(uuid) VALUES(?)"
         )) {
             stmt.setString(1, uuid.toString());
             stmt.executeUpdate();
@@ -27,7 +27,7 @@ public class BackpackDatabase {
 
     protected static List<ItemType> getContents(UUID uuid) throws SQLException {
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
-                "SELECT * FROM backpacktable WHERE uuid = ?"
+                "SELECT * FROM backpack WHERE uuid = ?"
         )) {
             stmt.setString(1, uuid.toString());
             ResultSet result = stmt.executeQuery();
@@ -49,7 +49,7 @@ public class BackpackDatabase {
     protected static void updateBackpack(PlayerData data) throws SQLException {
 
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
-                "UPDATE backpacktable SET foodSlot = ?, charmSlot = ?, toolSlot1 = ?, toolSlot2 = ? WHERE uuid = ?"
+                "UPDATE backpack SET foodSlot = ?, charmSlot = ?, toolSlot1 = ?, toolSlot2 = ? WHERE uuid = ?"
         )) {
             List<ItemType> list = data.getBackpack();
             stmt.setString(1, list.get(0).toString());

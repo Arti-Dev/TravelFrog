@@ -7,54 +7,27 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.UUID;
 
 public class InventoryDatabase {
 
-    protected static int getFourLeafClovers(UUID uuid) throws SQLException {
+    protected static HashMap<ItemType, Integer> getInventory(UUID uuid) throws SQLException {
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
-                "SELECT fourLeafClover FROM inventorytable WHERE uuid = ?"
+                "SELECT * FROM inventorytable WHERE uuid = ?"
         )) {
             stmt.setString(1, uuid.toString());
+            HashMap<ItemType, Integer> resultMap = new HashMap<>();
             ResultSet result = stmt.executeQuery();
             if (result.next()) {
-                return result.getInt("fourLeafClover");
+                for (ItemType type : ItemType.valuesList()) {
+                    resultMap.put(type, result.getInt(type.toString()));
+                }
+                return resultMap;
             } else {
                 // If they didn't exist before, add them!
                 addPlayer(uuid);
-                return 0;
-            }
-        }
-    }
-
-    protected static int getLanterns(UUID uuid) throws SQLException {
-        try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
-                "SELECT lantern FROM inventorytable WHERE uuid = ?"
-        )) {
-            stmt.setString(1, uuid.toString());
-            ResultSet result = stmt.executeQuery();
-            if (result.next()) {
-                return result.getInt("lantern");
-            } else {
-                // If they didn't exist before, add them!
-                addPlayer(uuid);
-                return 0;
-            }
-        }
-    }
-
-    protected static int getBread(UUID uuid) throws SQLException {
-        try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
-                "SELECT bread FROM inventorytable WHERE uuid = ?"
-        )) {
-            stmt.setString(1, uuid.toString());
-            ResultSet result = stmt.executeQuery();
-            if (result.next()) {
-                return result.getInt("bread");
-            } else {
-                // If they didn't exist before, add them!
-                addPlayer(uuid);
-                return 0;
+                return getInventory(uuid);
             }
         }
     }
@@ -72,42 +45,18 @@ public class InventoryDatabase {
 
     }
 
-    protected static void updateFourLeafClovers(PlayerData data) throws SQLException {
 
-        try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
-                "UPDATE inventorytable SET fourLeafClover = ? WHERE uuid = ?"
-        )) {
-            stmt.setLong(1, data.getItemCount(ItemType.FOUR_LEAF_CLOVER));
-            stmt.setString(2, data.getUuid().toString());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new SQLException("Error while saving four-leaf clovers to database");
-        }
-    }
-
-    protected static void updateLanterns(PlayerData data) throws SQLException {
-
-        try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
-                "UPDATE inventorytable SET lantern = ? WHERE uuid = ?"
-        )) {
-            stmt.setLong(1, data.getItemCount(ItemType.LANTERN));
-            stmt.setString(2, data.getUuid().toString());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new SQLException("Error while saving lanterns to database");
-        }
-    }
-
-    protected static void updateBread(PlayerData data) throws SQLException {
-
-        try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
-                "UPDATE inventorytable SET bread = ? WHERE uuid = ?"
-        )) {
-            stmt.setLong(1, data.getItemCount(ItemType.BREAD));
-            stmt.setString(2, data.getUuid().toString());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new SQLException("Error while saving bread to database");
+    protected static void updateInventory(PlayerData data) throws SQLException {
+        for (ItemType type : ItemType.valuesList()) {
+            try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
+                    "UPDATE inventorytable SET " + type.name() + " = ? WHERE uuid = ?"
+            )) {
+                stmt.setInt(1, data.getItemCount(type));
+                stmt.setString(2, data.getUuid().toString());
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                throw new SQLException("Error while saving inventory to database");
+            }
         }
     }
 
