@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum ItemType {
-    // TODO Add item limits.
     FOUR_LEAF_CLOVER(Material.MANGROVE_PROPAGULE, -1, false, ItemCategory.CHARM, Component.text("Four-leaf Clover", NamedTextColor.GREEN)
             .decoration(TextDecoration.ITALIC, false),
             Component.text("It's some kind of good-luck charm.", NamedTextColor.GREEN)),
@@ -21,6 +20,27 @@ public enum ItemType {
             Component.text("An excellent and very portable light source.", NamedTextColor.YELLOW)),
     BREAD(Material.BREAD, 10, false, ItemCategory.FOOD, Component.text("Bread", NamedTextColor.GOLD),
             Component.text("Three wheat.").color(NamedTextColor.GRAY)),
+    BOTTLE_O_ENCHANTING(Material.EXPERIENCE_BOTTLE, -1, false, ItemCategory.CHARM,
+            Component.text("Bottle o' Enchanting", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false),
+            Component.text("Might be split into variations soon!"),
+            Component.text("Makes it easier to travel to certain biomes.", NamedTextColor.WHITE)),
+    SMALL_FISH(Material.COD, 20, false, ItemCategory.FOOD,
+            Component.text("Small Fish", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false),
+            Component.text("For small froggies.", NamedTextColor.GRAY)),
+    KABOCHA_PIE(Material.PUMPKIN_PIE, 50, false, ItemCategory.FOOD,
+            Component.text("Kabocha Pie", NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false),
+            Component.text("A Japanese gourd.. but pie.", NamedTextColor.GRAY),
+            Component.text("I'm not doing a good job at porting the original food, aren't I.", NamedTextColor.DARK_GRAY)),
+    RABBIT_STEW(Material.RABBIT_STEW, 80, false, ItemCategory.FOOD,
+            Component.text("Rabbit Stew", NamedTextColor.RED).decoration(TextDecoration.ITALIC, false),
+            Component.text("ok can the frog REALLY eat that much", NamedTextColor.DARK_GRAY)),
+    INANIMATE_SLIME(Material.SLIME_BLOCK, 100, false, ItemCategory.FOOD,
+            Component.text("Inanimate Slime", NamedTextColor.DARK_GREEN).decoration(TextDecoration.ITALIC, false),
+            Component.text("Not quite the real thing..", NamedTextColor.GRAY)),
+    BOTTLE_OF_FIREFLIES(Material.GLASS_BOTTLE, 100, false, ItemCategory.FOOD,
+            Component.text("Bottle of Fireflies", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false),
+            Component.text("..except they were never added to the game", NamedTextColor.GRAY),
+            Component.text("I KNOW FROGS DON'T EAT FIREFLIES IRL", NamedTextColor.DARK_GRAY)),
     NONE(null, -1, true, null, null);
 
     private final int price;
