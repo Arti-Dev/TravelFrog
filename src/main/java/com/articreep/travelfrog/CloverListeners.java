@@ -41,7 +41,7 @@ public class CloverListeners implements Listener {
             CloverType cloverType = data.getRunnable().removeClover(clickedLoc);
             if (cloverType == null) return;
             if (cloverType == CloverType.CLOVER) {
-                data.incrementCloverCount(1);
+                data.incrementClovers(1);
             } else if (cloverType == CloverType.FOUR_LEAF_CLOVER) {
                 data.incrementItemCount(ItemType.FOUR_LEAF_CLOVER, 1);
             }

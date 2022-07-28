@@ -77,6 +77,22 @@ public class CloverDatabase {
         }
     }
 
+    protected static int getTickets(UUID uuid) throws SQLException {
+        try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
+                "SELECT tickets FROM clovertable WHERE uuid = ?"
+        )) {
+            stmt.setString(1, uuid.toString());
+            ResultSet result = stmt.executeQuery();
+            if (result.next()) {
+                return result.getInt("tickets");
+            } else {
+                // If they didn't exist before, add them!
+                addPlayer(uuid);
+                return 0;
+            }
+        }
+    }
+
     private static void addPlayer(UUID uuid) throws SQLException {
         // Adds a new UUID into the database
         try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
@@ -143,6 +159,18 @@ public class CloverDatabase {
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new SQLException("Error while saving lastSeen to database");
+        }
+    }
+
+    protected static void updateTickets(PlayerData data) throws SQLException {
+        try (Connection connection = TravelFrog.getSQLConnection(); PreparedStatement stmt = connection.prepareStatement(
+                "UPDATE clovertable SET tickets = ? WHERE uuid = ?"
+        )) {
+            stmt.setLong(1, data.getTickets());
+            stmt.setString(2, data.getUuid().toString());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLException("Error while saving tickets to database");
         }
     }
 }

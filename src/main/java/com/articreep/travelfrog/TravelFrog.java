@@ -48,6 +48,7 @@ public final class TravelFrog extends JavaPlugin {
                 "lastSeen TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," +
                 "cloversWaiting INT DEFAULT 25 NOT NULL," +
                 "fourLeafCloversWaiting INT DEFAULT 0 NOT NULL," +
+                "tickets INT DEFAULT 0 NOT NULL," +
                 "PRIMARY KEY (uuid));";
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement stmt = conn.prepareStatement(sql);

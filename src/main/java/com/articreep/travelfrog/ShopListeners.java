@@ -2,7 +2,6 @@ package com.articreep.travelfrog;
 
 import com.articreep.travelfrog.playerdata.PlayerData;
 import com.articreep.travelfrog.playerdata.PlayerDataManager;
-import io.papermc.paper.event.entity.EntityDamageItemEvent;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.entity.ItemFrame;
@@ -10,11 +9,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
-import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -109,7 +105,7 @@ public class ShopListeners implements Listener {
                     return;
                 }
 
-                data.decrementCloverCount(price);
+                data.decrementClovers(price);
                 data.incrementItemCount(type, 1);
                 p.closeInventory();
                 p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);

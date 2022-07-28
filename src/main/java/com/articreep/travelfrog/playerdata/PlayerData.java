@@ -44,6 +44,7 @@ public class PlayerData {
 
     protected void load() throws SQLException {
         clovers = CloverDatabase.getClovers(uuid);
+        tickets = CloverDatabase.getTickets(uuid);
         itemMap = InventoryDatabase.getInventory(uuid);
         for (ItemType type : ItemType.valuesList()) {
             addToInventory(type);
@@ -127,7 +128,7 @@ public class PlayerData {
         // This mechanic is actually present in the actual game!
         CloverDatabase.updateLastSeen(uuid);
 
-        Bukkit.getScheduler().runTask(TravelFrog.getPlugin(), () -> displayScoreboardToPlayer(uuid, clovers));
+        Bukkit.getScheduler().runTask(TravelFrog.getPlugin(), () -> displayScoreboardToPlayer(uuid, clovers, tickets));
     }
 
     protected void save() {
@@ -142,15 +143,27 @@ public class PlayerData {
         }
     }
 
-    public void incrementCloverCount(int amount) {
+    public void incrementClovers(int amount) {
         // This increments only on the scoreboard and in PlayerData. It does not save to SQL.
         clovers += amount;
         updateScoreboard();
     }
 
-    public void decrementCloverCount(int amount) {
+    public void decrementClovers(int amount) {
         // This decrements only on the scoreboard and in PlayerData. It does not save to SQL.
         clovers -= amount;
+        updateScoreboard();
+    }
+
+    public void incrementTickets(int amount) {
+        // This increments only on the scoreboard and in PlayerData. It does not save to SQL.
+        tickets += amount;
+        updateScoreboard();
+    }
+
+    public void decrementTickets(int amount) {
+        // This decrements only on the scoreboard and in PlayerData. It does not save to SQL.
+        tickets -= amount;
         updateScoreboard();
     }
 
@@ -230,7 +243,7 @@ public class PlayerData {
     }
 
 
-    private static void displayScoreboardToPlayer(UUID uuid, int clovers) {
+    private static void displayScoreboardToPlayer(UUID uuid, int clovers, int tickets) {
 
         Player p = Bukkit.getPlayer(uuid);
         if (p == null) return;
@@ -242,8 +255,10 @@ public class PlayerData {
                 Component.text("Travel Frog").color(NamedTextColor.YELLOW), RenderType.INTEGER);
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-        Score score = objective.getScore(ChatColor.GREEN + "Clovers:");
-        score.setScore(clovers);
+        Score cloverScore = objective.getScore(ChatColor.GREEN + "Clovers:");
+        Score ticketScore = objective.getScore(ChatColor.YELLOW + "Tickets:");
+        cloverScore.setScore(clovers);
+        ticketScore.setScore(tickets);
 
         p.setScoreboard(board);
     }
@@ -251,12 +266,18 @@ public class PlayerData {
     private void updateScoreboard() {
         Scoreboard board = player.getScoreboard();
         Objective objective = board.getObjective("Title");
-        Score score = objective.getScore(ChatColor.GREEN + "Clovers:");
-        score.setScore(clovers);
+        Score cloverScore = objective.getScore(ChatColor.GREEN + "Clovers:");
+        Score ticketScore = objective.getScore(ChatColor.YELLOW + "Tickets:");
+        cloverScore.setScore(clovers);
+        ticketScore.setScore(tickets);
     }
 
     public int getClovers() {
         return clovers;
+    }
+
+    public int getTickets() {
+        return tickets;
     }
 
     public int getItemCount(ItemType type) {
