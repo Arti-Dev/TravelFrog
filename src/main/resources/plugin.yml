@@ -11,3 +11,6 @@ commands:
   table:
     description: Opens the table.
     usage: /table
+  lottery:
+    description: Rolls the lottery.
+    usage: /lottery

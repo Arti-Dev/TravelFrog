@@ -71,6 +71,7 @@ public final class TravelFrog extends JavaPlugin {
 
         getCommand("backpack").setExecutor(new Backpack());
         getCommand("table").setExecutor(new Table());
+        getCommand("lottery").setExecutor(new Lottery());
 
 
     }
