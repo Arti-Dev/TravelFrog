@@ -135,6 +135,7 @@ public class PlayerData {
         try {
             CloverDatabase.updateClovers(this);
             CloverDatabase.updateCloversWaiting(this);
+            CloverDatabase.updateTickets(this);
             InventoryDatabase.updateInventory(this);
             BackpackDatabase.updateBackpack(this);
             TableDatabase.updateTable(this);
