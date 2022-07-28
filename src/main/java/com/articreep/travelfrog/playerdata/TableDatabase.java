@@ -56,7 +56,7 @@ public class TableDatabase {
                         " toolSlot1 = ?, toolSlot2 = ?, toolSlot3 = ?, toolSlot4 = ? WHERE uuid = ?"
         )) {
             List<ItemType> list = data.getTable();
-            for (int i = 0; i < 7; i++) {
+            for (int i = 0; i < 8; i++) {
                 stmt.setString(i+1, list.get(i).name());
             }
             stmt.setString(9, data.getUuid().toString());
