@@ -24,7 +24,7 @@ public class InventoryListeners implements Listener {
     public void onClick(InventoryClickEvent event) {
         // We are canceling all clicks in the player's inventory
         if (event.getClickedInventory() == event.getWhoClicked().getInventory()) {
-            // DEBUGGING PURPOSES
+            // TODO DEBUGGING PURPOSES
             if (event.getWhoClicked().getGameMode() == GameMode.CREATIVE) return;
             event.setCancelled(true);
         }
@@ -33,7 +33,7 @@ public class InventoryListeners implements Listener {
     @EventHandler
     public void onDrag(InventoryDragEvent event) {
         if (event.getInventory() == event.getWhoClicked().getInventory()) {
-            // DEBUGGING PURPOSES
+            // TODO DEBUGGING PURPOSES
             if (event.getWhoClicked().getGameMode() == GameMode.CREATIVE) return;
             event.setCancelled(true);
         } else if (event.getInventory().getHolder() == null) {

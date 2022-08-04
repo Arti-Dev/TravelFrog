@@ -6,3 +6,16 @@ database:
   password:
 clovers:
   y-level: 73
+  debug-generation: false
+  # This does not account for the bonus.
+  maxClovers: 20
+  maxcloverBonus: 5
+  # This is the chance, in percent, for each clover to turn into a four-leaf clover.
+  fourLeafChance: 0.5
+lottery:
+  # These are chances, in percent, for a certain color marble to be rolled in the lottery.
+  # If the sum of these values surpasses 100, default values will be used instead.
+  gold: 3
+  red: 6
+  green: 9
+  blue: 16

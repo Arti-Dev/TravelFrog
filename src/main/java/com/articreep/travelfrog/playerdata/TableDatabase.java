@@ -32,14 +32,14 @@ public class TableDatabase {
             ResultSet result = stmt.executeQuery();
             ArrayList<ItemType> list = new ArrayList<>();
             if (result.next()) {
-                list.add(ItemType.valueOf(result.getString("foodSlot1")));
-                list.add(ItemType.valueOf(result.getString("foodSlot2")));
-                list.add(ItemType.valueOf(result.getString("charmSlot1")));
-                list.add(ItemType.valueOf(result.getString("charmSlot2")));
-                list.add(ItemType.valueOf(result.getString("toolSlot1")));
-                list.add(ItemType.valueOf(result.getString("toolSlot2")));
-                list.add(ItemType.valueOf(result.getString("toolSlot3")));
-                list.add(ItemType.valueOf(result.getString("toolSlot4")));
+                list.add(ItemType.toEnum(result.getString("foodSlot1")));
+                list.add(ItemType.toEnum(result.getString("foodSlot2")));
+                list.add(ItemType.toEnum(result.getString("charmSlot1")));
+                list.add(ItemType.toEnum(result.getString("charmSlot2")));
+                list.add(ItemType.toEnum(result.getString("toolSlot1")));
+                list.add(ItemType.toEnum(result.getString("toolSlot2")));
+                list.add(ItemType.toEnum(result.getString("toolSlot3")));
+                list.add(ItemType.toEnum(result.getString("toolSlot4")));
                 return list;
             } else {
                 // If they didn't exist before, add them!

@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -70,25 +71,31 @@ public class PlayerData {
         long generatedClovers = (CloverDatabase.getLastSeen(uuid).until(Instant.now(), ChronoUnit.MINUTES) / 6);
         long counter;
 
+        // Import config
+        FileConfiguration config = TravelFrog.getPlugin().getConfig();
+        int cloverCap = config.getInt("clovers.maxClovers");
+        int cloverBonusCap = config.getInt("clovers.maxCloverBonus");
+        double fourLeafChance = config.getDouble("clovers.fourLeafChance") * 0.01;
+
         // Load clovers from previous session.
 
         // If these imported clovers amount to 25 or higher, do not generate any new clovers.
-        if (importedClovers >= 25) {
+        if (importedClovers >= cloverCap) {
             counter = importedClovers;
         } else {
             // Total cannot go above 25
             counter = importedClovers + generatedClovers;
-            if (counter > 25) counter = 25;
+            if (counter > cloverCap) counter = cloverCap;
         }
 
-        // This is the random bonus, from 0 to 5.
+        // This is the random bonus - default max is 5.
         // There cannot be any imported clovers, and the counter must be above 5.
         if (importedClovers == 0 && counter > 5) {
-            counter = counter + (int) (Math.random() * 5);
+            counter = counter + (int) (Math.random() * cloverBonusCap);
         }
 
-        // Hard cap at 30 - just in case my logic has gone wrong.
-        if (counter > 30) counter = 30;
+        // Hard cap at cloverCap + cloverBonusCap - just in case my logic has gone wrong.
+        if (counter > cloverCap + cloverBonusCap) counter = cloverCap + cloverBonusCap;
 
         // Now that we know how many clovers to add to the field, start making some sets.
         final Set<Location> cloverSet = new HashSet<>();
@@ -110,7 +117,7 @@ public class PlayerData {
         for (Location l; counter > 0; counter--, importedClovers--) {
 
             // Every regular clover that is newly generated has a 1/200 (0.005) chance to be a four-leaf clover.
-            if (importedClovers <= 0 && Math.random() < 0.005) {
+            if (importedClovers <= 0 && Math.random() < fourLeafChance) {
                 l = Utils.getRandomCloverLocation(player.getWorld(), CloverType.FOUR_LEAF_CLOVER, locationsUsed);
                 fourLeafCloverSet.add(l);
             } else {

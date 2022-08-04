@@ -33,10 +33,10 @@ public class BackpackDatabase {
             ResultSet result = stmt.executeQuery();
             ArrayList<ItemType> list = new ArrayList<>();
             if (result.next()) {
-                list.add(ItemType.valueOf(result.getString("foodSlot")));
-                list.add(ItemType.valueOf(result.getString("charmSlot")));
-                list.add(ItemType.valueOf(result.getString("toolSlot1")));
-                list.add(ItemType.valueOf(result.getString("toolSlot2")));
+                list.add(ItemType.toEnum(result.getString("foodSlot")));
+                list.add(ItemType.toEnum(result.getString("charmSlot")));
+                list.add(ItemType.toEnum(result.getString("toolSlot1")));
+                list.add(ItemType.toEnum(result.getString("toolSlot2")));
                 return list;
             } else {
                 // If they didn't exist before, add them!

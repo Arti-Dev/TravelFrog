@@ -62,7 +62,7 @@ public class Utils {
         return null;
     }
 
-    public static ItemStack updateInventoryItem(ItemStack item, ItemType type, int amount) {
+    public static void updateInventoryItem(ItemStack item, ItemType type, int amount) {
         ItemMeta meta = item.getItemMeta();
         meta.displayName(type.getName());
         meta.lore(type.createLore(amount));
@@ -71,7 +71,6 @@ public class Utils {
         if (amount < 0) item.setAmount(1);
         else item.setAmount(Math.min(amount, 64));
         item.setType(type.getMaterial());
-        return item;
     }
 
     // For the backpack and the table
@@ -105,6 +104,16 @@ public class Utils {
             loreList.add(Component.text("You already bought this item!", NamedTextColor.RED));
         }
         meta.lore(loreList);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    public static ItemStack createLotteryItem(ItemType type) {
+        ItemStack item = new ItemStack(type.getMaterial());
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(type.getName());
+        meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, type.name());
+        meta.lore(type.getRawLore());
         item.setItemMeta(meta);
         return item;
     }
