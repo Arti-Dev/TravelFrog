@@ -106,6 +106,7 @@ public class Lottery implements CommandExecutor, Listener {
             Bukkit.getScheduler().scheduleSyncDelayedTask(TravelFrog.getPlugin(), () -> {
                 Inventory inv = Bukkit.createInventory(null, 27, Component.text("Lottery"));
                 inv.setItem(13, color.getHead());
+                p.playSound(p, Sound.BLOCK_BELL_USE, 1, 1);
                 p.openInventory(inv);
                 inUse = false;
             }, 80);
@@ -137,7 +138,8 @@ public class Lottery implements CommandExecutor, Listener {
                 PlayerData data = PlayerDataManager.getPlayerData(player.getUniqueId());
                 data.incrementItemCount(type, 1);
                 prizesInUse.remove(player);
-                event.getWhoClicked().closeInventory();
+                player.playSound(player, Sound.ENTITY_ARROW_HIT_PLAYER, 1, 1);
+                player.closeInventory();
             }
         }
     }
