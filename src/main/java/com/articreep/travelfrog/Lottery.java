@@ -129,7 +129,7 @@ public class Lottery implements CommandExecutor, Listener {
             event.setCancelled(true);
             // must be in the top inventory though
             if (event.getInventory() != event.getClickedInventory()) return;
-            ItemStack itemClicked = event.getView().getItem(event.getRawSlot());
+            ItemStack itemClicked = event.getCurrentItem();
             if (itemClicked == null) return;
 
             PersistentDataContainer container = itemClicked.getItemMeta().getPersistentDataContainer();

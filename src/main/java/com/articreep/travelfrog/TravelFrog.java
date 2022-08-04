@@ -4,7 +4,6 @@ import com.articreep.travelfrog.playerdata.PlayerDataManager;
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -65,14 +64,18 @@ public final class TravelFrog extends JavaPlugin {
             PlayerDataManager.registerPlayer(p);
         }
 
+        Lottery lottery = new Lottery();
+        Backpack backpack = new Backpack();
+        Table table = new Table();
+
         getServer().getPluginManager().registerEvents(new CloverListeners(), this);
         getServer().getPluginManager().registerEvents(new InventoryListeners(), this);
         getServer().getPluginManager().registerEvents(new ShopListeners(), this);
-        getServer().getPluginManager().registerEvents(new Lottery(), this);
+        getServer().getPluginManager().registerEvents(lottery, this);
 
-        getCommand("backpack").setExecutor(new Backpack());
-        getCommand("table").setExecutor(new Table());
-        getCommand("lottery").setExecutor(new Lottery());
+        getCommand("backpack").setExecutor(backpack);
+        getCommand("table").setExecutor(table);
+        getCommand("lottery").setExecutor(lottery);
 
 
     }

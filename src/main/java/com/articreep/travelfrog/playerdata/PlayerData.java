@@ -6,13 +6,10 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scoreboard.*;
 
 import java.sql.SQLException;
@@ -21,7 +18,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public class PlayerData {
-    private static final NamespacedKey key = new NamespacedKey(TravelFrog.getPlugin(), "TravelFrogType");
 
     // Only used sometimes
     private final Player player;
@@ -228,10 +224,7 @@ public class PlayerData {
         for (ItemStack item : inv.getContents()) {
             currentIndex++;
             if (item == null) continue;
-            PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
-            if (!container.has(key)) continue;
-            String string = container.get(key, PersistentDataType.STRING);
-            if (ItemType.valueOf(string) == type) {
+            if (Utils.getItemType(item) == type) {
 
                 if (hasItem || amount <= 0) {
                     inv.clear(currentIndex);
@@ -274,6 +267,10 @@ public class PlayerData {
     private void updateScoreboard() {
         Scoreboard board = player.getScoreboard();
         Objective objective = board.getObjective("Title");
+        if (objective == null) {
+            Bukkit.getLogger().severe(player.getName() + "'s scoreboard couldn't be updated!");
+            return;
+        }
         Score cloverScore = objective.getScore(ChatColor.GREEN + "Clovers:");
         Score ticketScore = objective.getScore(ChatColor.YELLOW + "Tickets:");
         cloverScore.setScore(clovers);

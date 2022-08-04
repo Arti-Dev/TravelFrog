@@ -1,7 +1,6 @@
 package com.articreep.travelfrog.playerdata;
 
 import com.articreep.travelfrog.CloverDisplayRunnable;
-import com.articreep.travelfrog.CloverListeners;
 import com.articreep.travelfrog.TravelFrog;
 
 import java.sql.Connection;
