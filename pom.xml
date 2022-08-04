@@ -6,7 +6,7 @@
 
     <groupId>com.articreep</groupId>
     <artifactId>TravelFrog</artifactId>
-    <version>0.2</version>
+    <version>0.3</version>
     <packaging>jar</packaging>
 
     <name>TravelFrog</name>
