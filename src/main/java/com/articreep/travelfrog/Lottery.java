@@ -121,8 +121,8 @@ public class Lottery implements CommandExecutor, Listener {
         if (event.getView().title().equals(Component.text("Lottery"))) {
             event.setCancelled(true);
             if (event.getSlot() == 13) {
+                // InventoryCloseEvent will take care of this
                 player.closeInventory();
-                openRewardInventory(player);
             }
         } else if (event.getView().title().equals(Component.text("Choose a prize"))) {
             event.setCancelled(true);
@@ -134,10 +134,10 @@ public class Lottery implements CommandExecutor, Listener {
             PersistentDataContainer container = itemClicked.getItemMeta().getPersistentDataContainer();
             if (container.has(key)) {
                 ItemType type = ItemType.valueOf(container.get(key, PersistentDataType.STRING));
-                event.getWhoClicked().closeInventory();
                 PlayerData data = PlayerDataManager.getPlayerData(player.getUniqueId());
                 data.incrementItemCount(type, 1);
                 prizesInUse.remove(player);
+                event.getWhoClicked().closeInventory();
             }
         }
     }
@@ -146,7 +146,8 @@ public class Lottery implements CommandExecutor, Listener {
     public void onInventoryClose(InventoryCloseEvent event) {
         if (event.getView().title().equals(Component.text("Lottery"))
                 || event.getView().title().equals(Component.text("Choose a prize"))) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(TravelFrog.getPlugin(), () -> openRewardInventory((Player) event.getPlayer()), 1);
+            Player player = (Player) event.getPlayer();
+            openRewardInventory(player);
         }
     }
 
@@ -169,10 +170,10 @@ public class Lottery implements CommandExecutor, Listener {
 
         PlayerData data = PlayerDataManager.getPlayerData(player.getUniqueId());
         if (color == BallColor.WHITE) {
-            player.closeInventory();
             player.sendMessage(ChatColor.YELLOW + "You received one ticket as a consolation prize!");
             data.incrementTickets(1);
             prizesInUse.remove(player);
+            player.closeInventory();
         } else {
             Inventory inv = Bukkit.createInventory(null, 27, Component.text("Choose a prize"));
             ItemType[] items = color.getItems();
@@ -182,7 +183,8 @@ public class Lottery implements CommandExecutor, Listener {
                 inv.setItem(slot, Utils.createLotteryItem(items[index]));
                 index++;
             }
-            player.openInventory(inv);
+            // Never open a new inventory on the same tick one is closed!
+            Bukkit.getScheduler().runTask(TravelFrog.getPlugin(), () -> player.openInventory(inv));
         }
     }
 
