@@ -72,6 +72,8 @@ public final class TravelFrog extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new InventoryListeners(), this);
         getServer().getPluginManager().registerEvents(new ShopListeners(), this);
         getServer().getPluginManager().registerEvents(lottery, this);
+        getServer().getPluginManager().registerEvents(backpack, this);
+        getServer().getPluginManager().registerEvents(table, this);
 
         getCommand("backpack").setExecutor(backpack);
         getCommand("table").setExecutor(table);
