@@ -7,9 +7,10 @@ database:
 clovers:
   y-level: 73
   debug-generation: false
-  # This does not account for the bonus.
+  # maxClovers is the maximum amount of clovers that can spawn without the bonus.
+  # maxCloverBonus is, you guessed it, the maximum bonus.
   maxClovers: 20
-  maxcloverBonus: 5
+  maxCloverBonus: 5
   # This is the chance, in percent, for each clover to turn into a four-leaf clover.
   fourLeafChance: 0.5
 lottery:
@@ -19,3 +20,6 @@ lottery:
   red: 6
   green: 9
   blue: 16
+other:
+  # Adjusts the chances for a bonus ticket to be awarded upon buying items. This number is in percent.
+  shopBonus: 20

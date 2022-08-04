@@ -3,6 +3,8 @@ package com.articreep.travelfrog;
 import com.articreep.travelfrog.playerdata.PlayerData;
 import com.articreep.travelfrog.playerdata.PlayerDataManager;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -97,6 +99,12 @@ public class ShopListeners implements Listener {
 
             data.decrementClovers(price);
             data.incrementItemCount(type, 1);
+
+            if (Math.random() * 100 < TravelFrog.getPlugin().getConfig().getDouble("other.shopBonus")) {
+                p.sendMessage(Component.text("BONUS! ", NamedTextColor.YELLOW).decorate(TextDecoration.BOLD)
+                        .append(Component.text("You got a bonus ticket from your purchase!", NamedTextColor.YELLOW)));
+            }
+
             p.closeInventory();
             p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
         }
