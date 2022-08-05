@@ -1,5 +1,8 @@
-package com.articreep.travelfrog;
+package com.articreep.travelfrog.features;
 
+import com.articreep.travelfrog.ItemType;
+import com.articreep.travelfrog.TravelFrog;
+import com.articreep.travelfrog.Utils;
 import com.articreep.travelfrog.playerdata.PlayerData;
 import com.articreep.travelfrog.playerdata.PlayerDataManager;
 import net.kyori.adventure.text.Component;
@@ -102,7 +105,9 @@ public class ShopListeners implements Listener {
 
             if (Math.random() * 100 < TravelFrog.getPlugin().getConfig().getDouble("other.shopBonus")) {
                 p.sendMessage(Component.text("BONUS! ", NamedTextColor.YELLOW).decorate(TextDecoration.BOLD)
-                        .append(Component.text("You got a bonus ticket from your purchase!", NamedTextColor.YELLOW)));
+                        .append(Component.text("You got a bonus ticket from your purchase!", NamedTextColor.YELLOW)
+                                .decoration(TextDecoration.BOLD, false)));
+                data.incrementTickets(1);
             }
 
             p.closeInventory();
