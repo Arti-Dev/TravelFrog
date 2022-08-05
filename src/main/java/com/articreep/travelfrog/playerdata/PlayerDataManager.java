@@ -18,14 +18,14 @@ public class PlayerDataManager {
             return;
         }
         Bukkit.getScheduler().runTaskAsynchronously(TravelFrog.getPlugin(), () -> {
-            PlayerData inventory = new PlayerData(p);
+            PlayerData data = new PlayerData(p);
             try {
-                inventory.load();
+                data.load();
             } catch (SQLException e) {
                 e.printStackTrace();
                 return;
             }
-            playerToInventoryMap.put(p.getUniqueId(), inventory);
+            playerToInventoryMap.put(p.getUniqueId(), data);
         });
     }
 
@@ -35,23 +35,36 @@ public class PlayerDataManager {
 
     public static void unregisterPlayer(UUID uuid) {
         // Save everything to SQL, then remove from hashmap
-        PlayerData inventory = playerToInventoryMap.get(uuid);
-        if (inventory == null) {
+        PlayerData data = playerToInventoryMap.get(uuid);
+        if (data == null) {
             Bukkit.getLogger().severe("For some reason, " + uuid.toString() + " didn't have a PlayerData object!");
             return;
         }
         playerToInventoryMap.remove(uuid);
-        Bukkit.getScheduler().runTaskAsynchronously(TravelFrog.getPlugin(), inventory::save);
+        Bukkit.getScheduler().runTaskAsynchronously(TravelFrog.getPlugin(), data::save);
     }
 
     public static void savePlayerData(UUID uuid) {
         // Save everything to SQL, then remove from hashmap
-        PlayerData inventory = playerToInventoryMap.get(uuid);
-        if (inventory == null) {
+        PlayerData data = playerToInventoryMap.get(uuid);
+        if (data == null) {
             Bukkit.getLogger().severe("For some reason, " + uuid.toString() + " didn't have a PlayerData object!");
             return;
         }
-        inventory.save();
+        data.save();
+    }
+
+    public static void reloadWithoutSaving(UUID uuid) {
+        PlayerData data = playerToInventoryMap.get(uuid);
+        if (data == null) {
+            Bukkit.getLogger().severe("For some reason, " + uuid.toString() + " didn't have a PlayerData object!");
+            return;
+        }
+        try {
+            data.load();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -39,6 +39,7 @@ public class PlayerData {
         uuid = player.getUniqueId();
     }
 
+    // Can be run multiple times!
     protected void load() throws SQLException {
         clovers = CloverDatabase.getClovers(uuid);
         tickets = CloverDatabase.getTickets(uuid);
@@ -124,6 +125,8 @@ public class PlayerData {
 
         }
 
+        if (runnable != null) runnable.cancel();
+
         runnable = new CloverDisplayRunnable(player, cloverSet, fourLeafCloverSet);
         runnable.runTaskTimer(TravelFrog.getPlugin(), 1, 5);
 
@@ -142,6 +145,7 @@ public class PlayerData {
             InventoryDatabase.updateInventory(this);
             BackpackDatabase.updateBackpack(this);
             TableDatabase.updateTable(this);
+            runnable.cancel();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -159,6 +163,11 @@ public class PlayerData {
         updateScoreboard();
     }
 
+    public void setClovers(int clovers) {
+        this.clovers = clovers;
+        updateScoreboard();
+    }
+
     public void incrementTickets(int amount) {
         // This increments only on the scoreboard and in PlayerData. It does not save to SQL.
         tickets += amount;
@@ -168,6 +177,11 @@ public class PlayerData {
     public void decrementTickets(int amount) {
         // This decrements only on the scoreboard and in PlayerData. It does not save to SQL.
         tickets -= amount;
+        updateScoreboard();
+    }
+
+    public void setTickets(int tickets) {
+        this.tickets = tickets;
         updateScoreboard();
     }
 
@@ -181,6 +195,20 @@ public class PlayerData {
         if (type == ItemType.NONE) return;
         itemMap.put(type, itemMap.get(type) - amount);
         addToInventory(type);
+    }
+
+    public void setItemCount(ItemType type, int amount) {
+        if (type == ItemType.NONE) return;
+        itemMap.put(type, amount);
+        addToInventory(type);
+    }
+
+    public void clearItems() {
+        itemMap.clear();
+        for (ItemType type : ItemType.valuesList()) {
+            itemMap.put(type, 0);
+            addToInventory(type);
+        }
     }
 
     public void setInBackpack(int index, ItemType type) {

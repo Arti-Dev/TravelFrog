@@ -1,18 +1,30 @@
 package com.articreep.travelfrog;
 
+import com.articreep.travelfrog.commands.CloversCommand;
+import com.articreep.travelfrog.commands.FrogItemsCommand;
+import com.articreep.travelfrog.commands.LoadFromSQLCommand;
+import com.articreep.travelfrog.commands.TicketsCommand;
+import com.articreep.travelfrog.features.Backpack;
+import com.articreep.travelfrog.features.Lottery;
+import com.articreep.travelfrog.features.ShopListeners;
+import com.articreep.travelfrog.features.Table;
 import com.articreep.travelfrog.playerdata.PlayerDataManager;
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.mysql.cj.jdbc.MysqlDataSource;
 import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public final class TravelFrog extends JavaPlugin {
+public final class TravelFrog extends JavaPlugin implements CommandExecutor {
     private static TravelFrog plugin;
     private final static MysqlDataSource dataSource = new MysqlConnectionPoolDataSource();
     private static int cloverYValue;
@@ -78,8 +90,52 @@ public final class TravelFrog extends JavaPlugin {
         getCommand("backpack").setExecutor(backpack);
         getCommand("table").setExecutor(table);
         getCommand("lottery").setExecutor(lottery);
+        getCommand("reloadtravelfrog").setExecutor(this);
+        getCommand("loadfromsql").setExecutor(new LoadFromSQLCommand());
+        getCommand("clovers").setExecutor(new CloversCommand());
+        getCommand("tickets").setExecutor(new TicketsCommand());
+        getCommand("frogitems").setExecutor(new FrogItemsCommand());
 
 
+    }
+
+    // Reload command
+    @Override
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        // Save everyone's data
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            PlayerDataManager.unregisterPlayer(p.getUniqueId());
+        }
+
+        reloadConfig();
+
+        // Just in case
+        saveDefaultConfig();
+
+        FileConfiguration config = getConfig();
+        dataSource.setServerName(config.getString("database.host"));
+        dataSource.setPortNumber(config.getInt("database.port"));
+        dataSource.setDatabaseName(config.getString("database.database"));
+        dataSource.setUser(config.getString("database.user"));
+        dataSource.setPassword(config.getString("database.password"));
+
+        // Test the connection, if it fails do not load the plugin
+        try {
+            testDatabaseConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            getServer().getPluginManager().disablePlugin(this);
+        }
+
+        // Pull the clover height from the config
+        cloverYValue = config.getInt("clovers.y-level");
+
+        // Import everyone's data
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            PlayerDataManager.registerPlayer(p);
+        }
+
+        return true;
     }
 
     @Override
@@ -109,4 +165,5 @@ public final class TravelFrog extends JavaPlugin {
     public static int getCloverYValue() {
         return cloverYValue;
     }
+
 }

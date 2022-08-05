@@ -9,6 +9,7 @@ import org.bukkit.block.data.type.SmallDripleaf;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.Iterator;
 import java.util.Set;
 
 public class CloverDisplayRunnable extends BukkitRunnable {
@@ -82,6 +83,20 @@ public class CloverDisplayRunnable extends BukkitRunnable {
 
     public int getFourLeafCloverAmount() {
         return fourLeafCloverSet.size();
+    }
+
+    /**
+     * Attempts to cancel the task.
+     * Additionally, removes all clovers from the client's view.
+     */
+    @Override
+    public void cancel() {
+        for (Location loc : cloverSet) {
+            player.sendBlockChange(loc, loc.getBlock().getBlockData());
+            loc.subtract(0, 1, 0);
+            player.sendBlockChange(loc, loc.getBlock().getBlockData());
+        }
+        super.cancel();
     }
 
 }

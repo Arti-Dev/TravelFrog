@@ -14,3 +14,23 @@ commands:
   lottery:
     description: Rolls the lottery.
     usage: /lottery
+  reloadtravelfrog:
+    description: Reloads playerdata and config.
+    usage: /reloadtravelfrog
+    permission: travelfrog.reload
+  loadfromsql:
+    description: Reloads a player's data from SQL. This may cause player data to be rolled back. Only use this when changing database values.
+    usage: /loadfromsql <player/everyone>
+    permission: travelfrog.loadfromsql
+  clovers:
+    description: Manipulate other players' clover counts.
+    usage: /clovers <add/remove/set/check> <player> [amount]
+    permission: travelfrog.cloverscommand
+  tickets:
+    description: Manipulate other players' ticket counts.
+    usage: /tickets <add/remove/set/check> <player> [amount]
+    permission: travelfrog.ticketscommand
+  frogitems:
+    description: Manipulate other players' frog items.
+    usage: /frogitems <add/remove/set/check> <player> <itemtype> [amount]
+    permission: travelfrog.frogitemscommand

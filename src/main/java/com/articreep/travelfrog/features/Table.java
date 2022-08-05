@@ -1,12 +1,15 @@
-package com.articreep.travelfrog;
+package com.articreep.travelfrog.features;
 
+import com.articreep.travelfrog.ItemCategory;
+import com.articreep.travelfrog.ItemType;
+import com.articreep.travelfrog.Utils;
+import com.articreep.travelfrog.features.Backpack;
 import com.articreep.travelfrog.playerdata.PlayerData;
 import com.articreep.travelfrog.playerdata.PlayerDataManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

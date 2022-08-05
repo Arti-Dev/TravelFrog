@@ -1,5 +1,8 @@
-package com.articreep.travelfrog;
+package com.articreep.travelfrog.features;
 
+import com.articreep.travelfrog.ItemCategory;
+import com.articreep.travelfrog.ItemType;
+import com.articreep.travelfrog.Utils;
 import com.articreep.travelfrog.playerdata.PlayerData;
 import com.articreep.travelfrog.playerdata.PlayerDataManager;
 import net.kyori.adventure.text.Component;
