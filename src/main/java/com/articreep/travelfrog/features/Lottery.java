@@ -21,7 +21,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -42,80 +44,83 @@ public class Lottery implements CommandExecutor, Listener {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (sender instanceof Player p) {
-            PlayerData data = PlayerDataManager.getPlayerData(p.getUniqueId());
-            if (data == null) {
-                p.sendMessage(ChatColor.RED + "Didn't work!");
-                return true;
-            }
-            if (prizesInUse.containsKey(p)) return true;
-            if (inUse) {
-                p.sendMessage(ChatColor.RED + "The lottery is currently in use!");
-                return true;
-            }
-            inUse = true;
-            if (data.getTickets() < 5) {
-                p.sendMessage(ChatColor.RED + "Not enough tickets!");
-                return true;
-            }
-
-            data.decrementTickets(5);
-            Location loc = new Location(p.getWorld(), 642.5, 74.5, 67.5);
-
-            // roll
-            // TODO is there a better way to do this
-            FileConfiguration config = TravelFrog.getPlugin().getConfig();
-            double gold = config.getDouble("lottery.gold");
-            double red = config.getDouble("lottery.red");
-            double green = config.getDouble("lottery.green");
-            double blue = config.getDouble("lottery.blue");
-
-
-            if (gold + red + green + blue > 100) {
-                gold = 3;
-                red = 6;
-                green = 9;
-                blue = 16;
-            }
-
-            double roll = Math.random() * 100;
-            BallColor color;
-            if (roll < gold) color = BallColor.GOLD;
-            else if (roll < gold + red) color = BallColor.RED;
-            else if (roll < gold + red + green) color = BallColor.GREEN;
-            else if (roll < gold + red + green + blue) color = BallColor.BLUE;
-            else color = BallColor.WHITE;
-
-            prizesInUse.put(p, color);
-
-
-            new BukkitRunnable() {
-                int i = 0;
-                @Override
-                public void run() {
-                    if (i < 8) {
-                        p.getWorld().playSound(loc, Sound.ENTITY_PANDA_EAT, 1, 1);
-                        i++;
-                    } else this.cancel();
-
-                }
-            }.runTaskTimer(TravelFrog.getPlugin(), 0, 5);
-
-            Bukkit.getScheduler().scheduleSyncDelayedTask(TravelFrog.getPlugin(), () -> {
-                Item item = p.getWorld().dropItem(loc, color.getHead());
-                item.setCanPlayerPickup(false);
-                item.setTicksLived(5960);
-            }, 40);
-
-            Bukkit.getScheduler().scheduleSyncDelayedTask(TravelFrog.getPlugin(), () -> {
-                Inventory inv = Bukkit.createInventory(null, 27, Component.text("Lottery"));
-                inv.setItem(13, color.getHead());
-                p.playSound(p, Sound.BLOCK_BELL_USE, 1, 1);
-                p.openInventory(inv);
-                inUse = false;
-            }, 80);
-
+            runCommand(p);
         }
         return true;
+    }
+
+    private void runCommand(Player p) {
+        PlayerData data = PlayerDataManager.getPlayerData(p.getUniqueId());
+        if (data == null) {
+            p.sendMessage(ChatColor.RED + "Didn't work!");
+            return;
+        }
+        if (prizesInUse.containsKey(p)) return;
+        if (inUse) {
+            p.sendMessage(ChatColor.RED + "The lottery is currently in use!");
+            return;
+        }
+        if (data.getTickets() < 5) {
+            p.sendMessage(ChatColor.RED + "Not enough tickets!");
+            return;
+        }
+
+        data.decrementTickets(5);
+        inUse = true;
+        Location loc = new Location(p.getWorld(), 642.5, 74.5, 67.5);
+
+        // roll
+        // TODO is there a better way to do this
+        FileConfiguration config = TravelFrog.getPlugin().getConfig();
+        double gold = config.getDouble("lottery.gold");
+        double red = config.getDouble("lottery.red");
+        double green = config.getDouble("lottery.green");
+        double blue = config.getDouble("lottery.blue");
+
+
+        if (gold + red + green + blue > 100) {
+            gold = 3;
+            red = 6;
+            green = 9;
+            blue = 16;
+        }
+
+        double roll = Math.random() * 100;
+        BallColor color;
+        if (roll < gold) color = BallColor.GOLD;
+        else if (roll < gold + red) color = BallColor.RED;
+        else if (roll < gold + red + green) color = BallColor.GREEN;
+        else if (roll < gold + red + green + blue) color = BallColor.BLUE;
+        else color = BallColor.WHITE;
+
+        prizesInUse.put(p, color);
+
+
+        new BukkitRunnable() {
+            int i = 0;
+            @Override
+            public void run() {
+                if (i < 8) {
+                    p.getWorld().playSound(loc, Sound.ENTITY_PANDA_EAT, 1, 1);
+                    i++;
+                } else this.cancel();
+
+            }
+        }.runTaskTimer(TravelFrog.getPlugin(), 0, 5);
+
+        Bukkit.getScheduler().scheduleSyncDelayedTask(TravelFrog.getPlugin(), () -> {
+            Item item = p.getWorld().dropItem(loc, color.getHead());
+            item.setCanPlayerPickup(false);
+            item.setTicksLived(5960);
+        }, 40);
+
+        Bukkit.getScheduler().scheduleSyncDelayedTask(TravelFrog.getPlugin(), () -> {
+            Inventory inv = Bukkit.createInventory(null, 27, Component.text("Lottery"));
+            inv.setItem(13, color.getHead());
+            p.playSound(p, Sound.BLOCK_BELL_USE, 1, 1);
+            p.openInventory(inv);
+            inUse = false;
+        }, 80);
     }
 
     @EventHandler
@@ -190,6 +195,19 @@ public class Lottery implements CommandExecutor, Listener {
             }
             // Never open a new inventory on the same tick one is closed!
             Bukkit.getScheduler().runTask(TravelFrog.getPlugin(), () -> player.openInventory(inv));
+        }
+    }
+
+    // TODO make these configurable
+    @EventHandler
+    public void onLotteryClick(PlayerInteractEvent event) {
+        if (event.getHand() == EquipmentSlot.HAND) return;
+        if (event.getClickedBlock() == null) return;
+        if (!event.getAction().isRightClick()) return;
+        Location lotteryLocation = new Location(event.getPlayer().getWorld(), 642, 73, 67);
+        Location clickedLocation = event.getClickedBlock().getLocation();
+        if (clickedLocation.equals(lotteryLocation)) {
+            runCommand(event.getPlayer());
         }
     }
 

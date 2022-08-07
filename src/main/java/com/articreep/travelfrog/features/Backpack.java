@@ -8,6 +8,7 @@ import com.articreep.travelfrog.playerdata.PlayerDataManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -16,6 +17,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -28,15 +31,19 @@ public class Backpack implements CommandExecutor, Listener {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (sender instanceof Player p) {
-            PlayerData data = PlayerDataManager.getPlayerData(p.getUniqueId());
-            if (data == null) {
-                p.sendMessage(ChatColor.RED + "Didn't work!");
-                return true;
-            }
-            Inventory inv = buildInventory(data.getBackpack());
-            p.openInventory(inv);
+            runCommand(p);
         }
         return true;
+    }
+
+    private void runCommand(Player p) {
+        PlayerData data = PlayerDataManager.getPlayerData(p.getUniqueId());
+        if (data == null) {
+            p.sendMessage(ChatColor.RED + "Didn't work!");
+            return;
+        }
+        Inventory inv = buildInventory(data.getBackpack());
+        p.openInventory(inv);
     }
 
     protected static Inventory buildInventory(List<ItemType> list) {
@@ -106,6 +113,19 @@ public class Backpack implements CommandExecutor, Listener {
                     }
                 }
             }
+        }
+    }
+
+    // TODO make these configurable
+    @EventHandler
+    public void onBackpackClick(PlayerInteractEvent event) {
+        if (event.getHand() == EquipmentSlot.HAND) return;
+        if (event.getClickedBlock() == null) return;
+        if (!event.getAction().isRightClick()) return;
+        Location backpackLocation = new Location(event.getPlayer().getWorld(), 634, 72, 75);
+        Location clickedLocation = event.getClickedBlock().getLocation();
+        if (clickedLocation.equals(backpackLocation)) {
+            runCommand(event.getPlayer());
         }
     }
 }

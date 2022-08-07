@@ -9,6 +9,7 @@ import com.articreep.travelfrog.playerdata.PlayerDataManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -17,6 +18,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -29,17 +32,20 @@ public class Table implements CommandExecutor, Listener {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (sender instanceof Player p) {
-            PlayerData data = PlayerDataManager.getPlayerData(p.getUniqueId());
-            if (data == null) {
-                p.sendMessage(ChatColor.RED + "Didn't work!");
-                return true;
-            }
-            Inventory inv = buildInventory(data.getTable());
-            p.openInventory(inv);
+            runCommand(p);
         }
         return true;
     }
 
+    private void runCommand(Player p) {
+        PlayerData data = PlayerDataManager.getPlayerData(p.getUniqueId());
+        if (data == null) {
+            p.sendMessage(ChatColor.RED + "Didn't work!");
+            return;
+        }
+        Inventory inv = buildInventory(data.getTable());
+        p.openInventory(inv);
+    }
     protected static Inventory buildInventory(List<ItemType> list) {
         Inventory inv = Bukkit.createInventory(null, 27, Component.text("Table"));
         for (int i = 0; i < inv.getSize(); i++) {
@@ -131,6 +137,20 @@ public class Table implements CommandExecutor, Listener {
                     }
                 }
             }
+        }
+    }
+
+    // TODO make these configurable
+    @EventHandler
+    public void onTableClick(PlayerInteractEvent event) {
+        if (event.getHand() == EquipmentSlot.HAND) return;
+        if (event.getClickedBlock() == null) return;
+        if (!event.getAction().isRightClick()) return;
+        Location tableLocation = new Location(event.getPlayer().getWorld(), 634, 72, 73);
+        Location tableLocation2 = new Location(event.getPlayer().getWorld(), 634, 73, 73);
+        Location clickedLocation = event.getClickedBlock().getLocation();
+        if (clickedLocation.equals(tableLocation) || clickedLocation.equals(tableLocation2)) {
+            runCommand(event.getPlayer());
         }
     }
 
