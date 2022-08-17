@@ -30,6 +30,7 @@ public class PlayerData {
     // fixed size list
     private final List<ItemType> backpack = Arrays.asList(new ItemType[4]);
     private final List<ItemType> table = Arrays.asList(new ItemType[8]);
+    private final Map<Integer, MailboxItem> mailbox = new HashMap<>();
     private final UUID uuid;
     private int clovers;
     private int tickets;
@@ -187,17 +188,23 @@ public class PlayerData {
 
     public void incrementItemCount(ItemType type, int amount) {
         if (type == ItemType.NONE) return;
+        if (type == ItemType.CLOVER) incrementClovers(amount);
+        if (type == ItemType.TICKET) incrementTickets(amount);
         itemMap.put(type, itemMap.get(type) + amount);
         addToInventory(type);
     }
 
     public void decrementItemCount(ItemType type, int amount) {
         if (type == ItemType.NONE) return;
+        if (type == ItemType.CLOVER) decrementClovers(amount);
+        if (type == ItemType.TICKET) decrementTickets(amount);
         itemMap.put(type, itemMap.get(type) - amount);
         addToInventory(type);
     }
 
     public void setItemCount(ItemType type, int amount) {
+        if (type == ItemType.CLOVER) setClovers(amount);
+        if (type == ItemType.TICKET) setTickets(amount);
         if (type == ItemType.NONE) return;
         itemMap.put(type, amount);
         addToInventory(type);

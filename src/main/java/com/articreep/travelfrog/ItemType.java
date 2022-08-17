@@ -105,7 +105,9 @@ public enum ItemType {
     CRACKERS_GREEN(Material.COOKIE, -1, false, ItemCategory.FOOD,
             Component.text("Crackers (green)", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false),
             Component.text("Just some crackers!", NamedTextColor.GRAY)),
-
+    // Special cases
+    CLOVER(Material.SMALL_DRIPLEAF, -1, true, null, null),
+    TICKET(Material.NAME_TAG, -1, true, null, null),
     NONE(null, -1, true, null, null);
 
     private final int price;
@@ -162,6 +164,8 @@ public enum ItemType {
     public static List<ItemType> valuesList() {
         List<ItemType> list = new ArrayList<>(Arrays.asList(values()));
         list.remove(ItemType.NONE);
+        list.remove(ItemType.CLOVER);
+        list.remove(ItemType.TICKET);
         return list;
     }
 

@@ -135,6 +135,7 @@ public final class TravelFrog extends JavaPlugin implements CommandExecutor {
             PlayerDataManager.registerPlayer(p);
         }
 
+        sender.sendMessage("Reload successful");
         return true;
     }
 
